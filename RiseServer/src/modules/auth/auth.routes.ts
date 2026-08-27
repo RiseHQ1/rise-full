@@ -16,6 +16,8 @@ import {
   forgotPasswordSchema,
   resetPasswordSchema,
   appleWebhookSchema,
+  sendOtpSchema,
+  verifyOtpSchema,
 } from './auth.schema.js';
 import { authenticate } from '@/middlewares/auth.middleware.js';
 import { z } from 'zod';
@@ -23,6 +25,30 @@ import { z } from 'zod';
 export async function authRoutes(fastify: FastifyInstance) {
   const authService = new AuthService();
   const authController = new AuthController(authService);
+
+  fastify.post(
+    '/send-otp',
+    {
+      schema: {
+        description: 'Generate and send a 6-digit email verification OTP',
+        tags: ['Authentication'],
+        body: sendOtpSchema,
+      },
+    },
+    authController.sendOtp.bind(authController)
+  );
+
+  fastify.post(
+    '/verify-otp',
+    {
+      schema: {
+        description: 'Verify 6-digit email OTP code',
+        tags: ['Authentication'],
+        body: verifyOtpSchema,
+      },
+    },
+    authController.verifyOtp.bind(authController)
+  );
 
   fastify.post(
     '/register',

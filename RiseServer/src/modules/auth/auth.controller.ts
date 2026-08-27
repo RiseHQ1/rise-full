@@ -131,6 +131,16 @@ export class AuthController {
     return reply.status(200).send(successResponse(result));
   }
 
+  async sendOtp(request: FastifyRequest<{ Body: SendOtpInput }>, reply: FastifyReply) {
+    const result = await this.authService.generateAndSendOTP(request.body.email, request.body.name);
+    return reply.status(200).send(successResponse(result));
+  }
+
+  async verifyOtp(request: FastifyRequest<{ Body: VerifyOtpInput }>, reply: FastifyReply) {
+    const result = await this.authService.verifyOTP(request.body.email, request.body.code);
+    return reply.status(200).send(successResponse(result));
+  }
+
   async appleWebhook(request: FastifyRequest<{ Body: AppleWebhookInput }>, reply: FastifyReply) {
     // Process Apple Server-to-Server notification
     return reply.status(200).send(successResponse({ status: 'PROCESSED' }));

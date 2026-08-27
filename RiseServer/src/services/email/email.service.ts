@@ -126,11 +126,52 @@ export class EmailService {
 </html>
     `;
 
+  /**
+   * Send Rise-branded 6-digit Email Verification OTP code.
+   */
+  async sendOTPEmail(toEmail: string, name: string, otpCode: string): Promise<boolean> {
+    const html = `
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Your Rise verification code</title>
+  <style>
+    body { margin: 0; padding: 0; background-color: #090616; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; color: #FFFFFF; }
+    .wrapper { width: 100%; max-width: 520px; margin: 40px auto; padding: 36px 28px; background: #12102D; border: 1px solid rgba(255, 255, 255, 0.12); border-radius: 24px; text-align: center; }
+    .logo { font-size: 26px; font-weight: 800; color: #FFD868; margin-bottom: 20px; letter-spacing: -0.5px; }
+    .title { font-size: 22px; font-weight: 700; color: #FFFFFF; margin-bottom: 12px; }
+    .text { font-size: 15px; line-height: 24px; color: #A1A1AA; margin-bottom: 28px; text-align: left; }
+    .otp-box { display: inline-block; padding: 18px 36px; background: #1A1638; border: 2px solid #F59E0B; border-radius: 16px; font-size: 36px; font-weight: 800; letter-spacing: 8px; color: #FFD868; margin: 12px 0 28px 0; }
+    .footer { margin-top: 32px; font-size: 12px; color: #71717A; text-align: center; line-height: 18px; }
+  </style>
+</head>
+<body>
+  <div class="wrapper">
+    <div class="logo">☀️ Rise</div>
+    <div class="title">Verify Your Email Address</div>
+    <div class="text">
+      Hi ${name || 'Friend'},<br><br>
+      Thank you for joining Rise. Please enter the 6-digit verification code below in your app to activate your account. This code expires in <strong>10 minutes</strong>.
+    </div>
+    <div class="otp-box">${otpCode}</div>
+    <div class="text" style="font-size: 13px; text-align: center; color: #71717A;">
+      If you did not request this code, you can safely ignore this email.
+    </div>
+    <div class="footer">
+      © ${new Date().getFullYear()} Rise Mindfulness Inc. All rights reserved.
+    </div>
+  </div>
+</body>
+</html>
+    `;
+
     return this.sendEmail({
       to: toEmail,
-      subject: 'Welcome to Rise! Confirm your email',
+      subject: `${otpCode} is your Rise verification code`,
       html,
-      text: `Welcome to Rise! Confirm your email here: ${verifyUrl}`,
+      text: `Your Rise verification code is ${otpCode}. It expires in 10 minutes.`,
     });
   }
 }

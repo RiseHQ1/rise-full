@@ -6,12 +6,52 @@
 //
 
 import { prisma } from '@/database/prisma.js';
+import { redis } from '@/database/redis.js';
 import { hashPassword, verifyPassword, generateSecureToken, sha256 } from '@/utils/crypto.js';
 import { RegisterInput, LoginInput, AppleAuthInput, ResetPasswordInput } from './auth.schema.js';
 import { logger } from '@/utils/logger.js';
 import { EmailService } from '@/services/email/email.service.js';
 
 export class AuthService {
+  private emailService = new EmailService();
+
+  /**
+   * Generate 6-digit OTP code, save in Redis for 10 minutes, and dispatch via email.
+   */
+  async generateAndSendOTP(email: string, name?: string): Promise<{ success: boolean; message: string }> {
+    const cleanEmail = email.toLowerCase().trim();
+    // Generate 6-digit random code
+    const otpCode = Math.floor(100000 + Math.random() * 900000).toString();
+
+    // Store in Redis with 600s (10 min) TTL
+    await redis.setex(`otp:${cleanEmail}`, 600, otpCode);
+    logger.info({ email: cleanEmail, otpCode }, 'Generated verification OTP code');
+
+    await this.emailService.sendOTPEmail(cleanEmail, name || 'Friend', otpCode);
+    return { success: true, message: 'Verification code sent successfully' };
+  }
+
+  /**
+   * Verify provided OTP code against Redis store.
+   */
+  async verifyOTP(email: string, code: string): Promise<{ verified: boolean }> {
+    const cleanEmail = email.toLowerCase().trim();
+    const storedCode = await redis.get(`otp:${cleanEmail}`);
+
+    if (!storedCode) {
+      throw { statusCode: 400, code: 'OTP_EXPIRED', message: 'Verification code has expired or does not exist' };
+    }
+
+    if (storedCode !== code.trim()) {
+      throw { statusCode: 400, code: 'INVALID_OTP', message: 'Invalid verification code. Please check and try again.' };
+    }
+
+    // Delete once verified
+    await redis.del(`otp:${cleanEmail}`);
+    logger.info({ email: cleanEmail }, 'Email OTP successfully verified');
+    return { verified: true };
+  }
+
   /**
    * Register a new user with Email and Password.
    */

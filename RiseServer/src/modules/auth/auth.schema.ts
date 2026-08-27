@@ -42,6 +42,16 @@ export const appleWebhookSchema = z.object({
   payload: z.string().min(1, 'Apple signed JWT payload is required'),
 });
 
+export const sendOtpSchema = z.object({
+  email: z.string().email('Invalid email address'),
+  name: z.string().optional(),
+});
+
+export const verifyOtpSchema = z.object({
+  email: z.string().email('Invalid email address'),
+  code: z.string().length(6, 'Verification code must be 6 digits'),
+});
+
 export type RegisterInput = z.infer<typeof registerSchema>;
 export type LoginInput = z.infer<typeof loginSchema>;
 export type AppleAuthInput = z.infer<typeof appleAuthSchema>;
@@ -49,3 +59,5 @@ export type RefreshTokenInput = z.infer<typeof refreshTokenSchema>;
 export type ForgotPasswordInput = z.infer<typeof forgotPasswordSchema>;
 export type ResetPasswordInput = z.infer<typeof resetPasswordSchema>;
 export type AppleWebhookInput = z.infer<typeof appleWebhookSchema>;
+export type SendOtpInput = z.infer<typeof sendOtpSchema>;
+export type VerifyOtpInput = z.infer<typeof verifyOtpSchema>;

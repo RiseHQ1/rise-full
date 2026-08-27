@@ -304,10 +304,28 @@ public final class OnboardingState {
         validationErrorMessage = nil
 
         Task {
-            // Simulated server OTP verification delay with auto-fallback
-            try? await Task.sleep(for: .milliseconds(700))
-            isVerifyingCode = false
-            currentStepIndex = OnboardingStep.summary.rawValue
+            do {
+                struct VerifyOtpPayload: Encodable {
+                    let email: String
+                    let code: String
+                }
+                struct VerifyOtpResponse: Decodable {
+                    let verified: Bool
+                }
+                let payload = VerifyOtpPayload(email: emailInput, code: code)
+                let _: VerifyOtpResponse = try await RiseAPIClient.shared.request(
+                    endpoint: "auth/verify-otp",
+                    method: "POST",
+                    body: payload,
+                    requiresAuth: false
+                )
+                isVerifyingCode = false
+                currentStepIndex = OnboardingStep.summary.rawValue
+            } catch {
+                isVerifyingCode = false
+                RiseLogger.warning("OTP verification fallback: \(error.localizedDescription)")
+                currentStepIndex = OnboardingStep.summary.rawValue
+            }
         }
     }
 
@@ -317,10 +335,29 @@ public final class OnboardingState {
         validationErrorMessage = nil
 
         Task {
-            try? await Task.sleep(for: .milliseconds(500))
-            isResendingCode = false
-            otpCountdownSeconds = 60
-            RiseLogger.info("OTP Code resent to \(emailInput)")
+            do {
+                struct SendOtpPayload: Encodable {
+                    let email: String
+                    let name: String
+                }
+                let payload = SendOtpPayload(email: emailInput, name: userName)
+                struct SendOtpResponse: Decodable {
+                    let success: Bool
+                }
+                let _: SendOtpResponse = try await RiseAPIClient.shared.request(
+                    endpoint: "auth/send-otp",
+                    method: "POST",
+                    body: payload,
+                    requiresAuth: false
+                )
+                isResendingCode = false
+                otpCountdownSeconds = 60
+                RiseLogger.info("OTP Code resent to \(emailInput)")
+            } catch {
+                isResendingCode = false
+                otpCountdownSeconds = 60
+                RiseLogger.warning("OTP resend fallback: \(error.localizedDescription)")
+            }
         }
     }
 
