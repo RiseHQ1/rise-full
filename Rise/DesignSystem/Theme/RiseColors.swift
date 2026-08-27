@@ -53,8 +53,6 @@ public enum RiseColors {
     /// Translucent surface overlay for glass materials (`Color.white.opacity(0.06)`).
     public static let surfaceGlass = Color.white.opacity(0.06)
 
-    // MARK: - Accents
-
     /// Sophisticated violet/purple accent representing mindfulness, growth, and energy (`#8B5CF6`).
     public static let accentPrimary = Color(hex: "#8B5CF6")
 
@@ -64,8 +62,15 @@ public enum RiseColors {
     /// Bright gold highlight for play controls, greeting accents, and progress dots (`#FFD868`).
     public static let accentGold = Color(hex: "#FFD868")
 
+    /// Semantic alias for gold accent.
+    public static let gold = accentGold
+
+    /// Semantic alias for emerald success.
+    public static let emerald = success
+
     /// Supporting indigo accent for smooth gradient transitions (`#6366F1`).
     public static let accentTertiary = Color(hex: "#6366F1")
+    public static let indigo = accentTertiary
 
     // MARK: - Text & Content
 

@@ -279,9 +279,11 @@ public struct DiscoverView: View {
                         .background(RiseColors.accentPrimary.opacity(0.35))
                         .clipShape(Capsule())
                 }
-                .padding(12)
             }
             .frame(width: 138, height: 196)
+            .riseCardStroke(cornerRadius: RiseRadius.cardLarge)
+            .riseShadow(RiseShadows.elevationLow)
+        }
         .buttonStyle(RisePressableButtonStyle())
         .accessibilityLabel("\(category.title), \(category.count) items")
     }
