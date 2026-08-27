@@ -168,7 +168,7 @@ function App() {
   const [aiSystemPrompt, setAiSystemPrompt] = useState(
     'You are Rise AI, an elite morning mindset coach steeped in Stoic philosophy, grounded presence, and peak performance discipline. Deliver powerful, crisp, empowering 2-sentence morning guidance tailored to the user’s selected focus areas.'
   );
-  const [aiModel, setAiModel] = useState('claude-3-5-sonnet');
+  const [aiModel, setAiModel] = useState('gemini-1.5-pro');
   const [aiTemperature, setAiTemperature] = useState(0.7);
   const [aiTestContext, setAiTestContext] = useState('Feeling overwhelmed by high stakes tasks today, needs focus and calm');
   const [aiTestOutput, setAiTestOutput] = useState('');
@@ -1356,10 +1356,11 @@ function App() {
                     <div className="input-field">
                       <label className="input-label">LLM Provider & Model</label>
                       <select className="flat-select" value={aiModel} onChange={(e) => setAiModel(e.target.value)}>
-                        <option value="claude-3-5-sonnet">Anthropic Claude 3.5 Sonnet (Recommended)</option>
+                        <option value="gemini-1.5-pro">Google Gemini 1.5 Pro (Active Provider)</option>
+                        <option value="gemini-2.0-flash">Google Gemini 2.0 Flash (Ultra-Fast)</option>
+                        <option value="claude-3-5-sonnet">Anthropic Claude 3.5 Sonnet</option>
                         <option value="gpt-4o">OpenAI GPT-4o</option>
                         <option value="gpt-4o-mini">OpenAI GPT-4o Mini (Fast/Low-Cost)</option>
-                        <option value="gemini-1.5-pro">Google Gemini 1.5 Pro</option>
                       </select>
                     </div>
 
