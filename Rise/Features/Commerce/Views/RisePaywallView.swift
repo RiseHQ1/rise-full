@@ -3,7 +3,7 @@
 //  Rise
 //
 //  Official Rise+ Premium Subscription Paywall Modal View
-//  Combines the approved Sunrise Hero visual design with Rise's authentic product features
+//  Faithfully styled to match the approved Sunrise Hero visual design with 3-tier commercial options
 //
 
 import SwiftUI
@@ -12,43 +12,46 @@ public struct RisePaywallView: View {
     @Environment(\.dismiss) private var dismiss
 
     public enum PlanTier: String, CaseIterable, Identifiable {
+        case annual
         case monthly
-        case yearly
+        case lifetime
 
-        public var id: String {
-            rawValue
-        }
+        public var id: String { rawValue }
 
         public var title: String {
             switch self {
+            case .annual: return "Annual Plan"
             case .monthly: return "Monthly Plan"
-            case .yearly: return "Annual Plan"
+            case .lifetime: return "Lifetime Access"
             }
         }
 
         public var priceString: String {
             switch self {
+            case .annual: return "$29.99 / year"
             case .monthly: return "$4.99 / month"
-            case .yearly: return "$29.99 / year"
+            case .lifetime: return "$79.99"
             }
         }
 
         public var subpriceString: String {
             switch self {
+            case .annual: return "$2.49/mo · 7-Day Free Trial"
             case .monthly: return "Billed monthly · Cancel anytime"
-            case .yearly: return "$2.49/mo · 7-Day Free Trial"
+            case .lifetime: return "Pay once · Unlimited forever"
             }
         }
 
         public var discountBadge: String? {
             switch self {
+            case .annual: return "Save 50%"
             case .monthly: return nil
-            case .yearly: return "Save 50%"
+            case .lifetime: return "ONE-TIME"
             }
         }
     }
 
-    @State private var selectedPlan: PlanTier = .yearly
+    @State private var selectedPlan: PlanTier = .annual
     @State private var isPurchasing = false
     @State private var showSuccessAlert = false
 
@@ -180,8 +183,8 @@ public struct RisePaywallView: View {
                     .padding(.horizontal, RiseSpacing.md)
                     .padding(.top, 4)
 
-                    // Plan Selection Container
-                    VStack(alignment: .leading, spacing: 12) {
+                    // Plan Selection Container (3-Tier)
+                    VStack(alignment: .leading, spacing: 10) {
                         HStack(spacing: 4) {
                             Text("SELECT MEMBERSHIP")
                                 .font(RiseTypography.captionBold)
@@ -189,11 +192,14 @@ public struct RisePaywallView: View {
                                 .tracking(1.2)
                         }
 
-                        // Monthly Option
+                        // 1. Annual Option (Default & Best Value)
+                        planRow(plan: .annual)
+
+                        // 2. Monthly Option
                         planRow(plan: .monthly)
 
-                        // Yearly Option (Featured)
-                        planRow(plan: .yearly)
+                        // 3. Lifetime Option
+                        planRow(plan: .lifetime)
                     }
                     .padding(18)
                     .background(Color(hex: "#15122B").opacity(0.95))
@@ -211,7 +217,7 @@ public struct RisePaywallView: View {
                     } label: {
                         HStack {
                             Spacer()
-                            Text(selectedPlan == .yearly ? "Start 7-Day Free Trial" : "Start RISE+ Monthly")
+                            Text(ctaButtonTitle)
                                 .font(.system(size: 17, weight: .bold, design: .rounded))
                                 .foregroundStyle(RiseColors.textOnGold)
                             Spacer()
@@ -237,7 +243,7 @@ public struct RisePaywallView: View {
                     .disabled(isPurchasing)
 
                     // Reassurance & Subtext
-                    Text(selectedPlan == .yearly ? "7 days free, then $29.99/year. Cancel anytime." : "Auto-renews monthly until canceled in App Store.")
+                    Text(reassuranceSubtext)
                         .font(RiseTypography.caption)
                         .foregroundStyle(RiseColors.textMuted)
                         .padding(.top, 10)
@@ -291,6 +297,24 @@ public struct RisePaywallView: View {
             Button("Let's Rise") { dismiss() }
         } message: {
             Text("Welcome to RISE+. You now have unlimited access to Google Gemini AI coaching, the full 8-Pack library, and harmonic soundscapes.")
+        }
+    }
+
+    // MARK: - Dynamic Labels
+
+    private var ctaButtonTitle: String {
+        switch selectedPlan {
+        case .annual: return "Start 7-Day Free Trial"
+        case .monthly: return "Start RISE+ Monthly"
+        case .lifetime: return "Unlock Lifetime Access"
+        }
+    }
+
+    private var reassuranceSubtext: String {
+        switch selectedPlan {
+        case .annual: return "7 days free, then $29.99/year. Cancel anytime."
+        case .monthly: return "Auto-renews monthly until canceled in App Store."
+        case .lifetime: return "One-time payment of $79.99. No recurring fees."
         }
     }
 
