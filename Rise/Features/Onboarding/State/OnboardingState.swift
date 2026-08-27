@@ -107,6 +107,8 @@ public final class OnboardingState {
         isAuthenticatingEmail || isAuthenticatingSocial
     }
 
+    public var isCompletingOnboarding: Bool = false
+
     // MARK: - OTP Email Verification Fields (Step 6)
 
     public var otpCode: String = ""
@@ -290,30 +292,17 @@ public final class OnboardingState {
                     refreshToken: result.tokens.refreshToken
                 )
                 isAuthenticatingEmail = false
+                validationErrorMessage = nil
                 currentStepIndex = OnboardingStep.emailVerification.rawValue
             } catch {
                 isAuthenticatingEmail = false
                 RiseLogger.error("Registration error: \(error)")
-                // Try sending OTP code explicitly as backup
-                do {
-                    struct SendOtpPayload: Encodable {
-                        let email: String
-                        let name: String
-                    }
-                    let otpPayload = SendOtpPayload(email: emailInput, name: trimmedName)
-                    struct SendOtpResponse: Decodable {
-                        let success: Bool
-                    }
-                    let _: SendOtpResponse = try await RiseAPIClient.shared.request(
-                        endpoint: "auth/send-otp",
-                        method: "POST",
-                        body: otpPayload,
-                        requiresAuth: false
-                    )
-                } catch {
-                    RiseLogger.warning("OTP dispatch backup notice: \(error.localizedDescription)")
+                let errString = "\(error)".lowercased()
+                if errString.contains("exists") || errString.contains("409") {
+                    validationErrorMessage = "An account with this email already exists. Please log in."
+                } else {
+                    validationErrorMessage = "Unable to create account. Please check your network and try again."
                 }
-                currentStepIndex = OnboardingStep.emailVerification.rawValue
             }
         }
     }
@@ -453,12 +442,14 @@ public final class OnboardingState {
                             accessToken: authResult.tokens.accessToken,
                             refreshToken: authResult.tokens.refreshToken
                         )
+                        self.isAuthenticatingSocial = false
+                        self.validationErrorMessage = nil
+                        self.currentStepIndex = OnboardingStep.summary.rawValue
                     } catch {
-                        RiseLogger.warning("Apple backend token exchange fallback: \(error.localizedDescription)")
+                        self.isAuthenticatingSocial = false
+                        RiseLogger.error("Apple backend token exchange error: \(error.localizedDescription)")
+                        self.validationErrorMessage = "Apple Sign-In could not connect to server. Please try again."
                     }
-                    self.isAuthenticatingSocial = false
-                    self.validationErrorMessage = nil
-                    self.currentStepIndex = OnboardingStep.summary.rawValue
                 }
             }
         case let .failure(error):
@@ -509,12 +500,12 @@ public final class OnboardingState {
                 self.userName = result.user.name
                 self.authProvider = .google
                 self.isAuthenticatingSocial = false
+                self.validationErrorMessage = nil
                 self.currentStepIndex = OnboardingStep.summary.rawValue
             } catch {
                 self.isAuthenticatingSocial = false
-                RiseLogger.warning("Google auth fallback: \(error.localizedDescription)")
-                self.authProvider = .google
-                self.currentStepIndex = OnboardingStep.summary.rawValue
+                RiseLogger.error("Google auth error: \(error.localizedDescription)")
+                self.validationErrorMessage = "Google Sign-In failed. Please try again."
             }
         }
     }
@@ -552,6 +543,7 @@ public final class OnboardingState {
         }
 
         validationErrorMessage = nil
+        isCompletingOnboarding = true
 
         // Build & Save Full Profile
         let profile = UserProfile(
@@ -567,48 +559,50 @@ public final class OnboardingState {
         )
 
         // Persist UserProfile & Completion Flag
-        do {
-            if let data = try? JSONEncoder().encode(profile) {
-                UserDefaults.standard.set(data, forKey: "saved_user_profile")
-            }
+        if let data = try? JSONEncoder().encode(profile) {
+            UserDefaults.standard.set(data, forKey: "saved_user_profile")
         }
 
         // Sync Focus Areas and Preferences to Live Backend
-        Task {
-            guard RiseAPIClient.shared.isAuthenticated else { return }
-            do {
-                struct SyncProfilePayload: Encodable {
-                    let name: String
-                    let focusAreas: [String]
-                    let onboardingComplete: Bool
-                    let motivationStyle: String
-                    let morningBoostTime: String
-                    let eveningReflectionTime: String
-                    let focusDurationMinutes: Int
-                    let notificationsEnabled: Bool
+        Task { @MainActor in
+            if RiseAPIClient.shared.isAuthenticated {
+                do {
+                    struct SyncProfilePayload: Encodable {
+                        let name: String
+                        let focusAreas: [String]
+                        let onboardingComplete: Bool
+                        let motivationStyle: String
+                        let morningBoostTime: String
+                        let eveningReflectionTime: String
+                        let focusDurationMinutes: Int
+                        let notificationsEnabled: Bool
+                    }
+                    let payload = SyncProfilePayload(
+                        name: trimmedName,
+                        focusAreas: selectedCategories.map { $0.title },
+                        onboardingComplete: true,
+                        motivationStyle: selectedMotivationStyle?.title ?? "Gentle Encouragement",
+                        morningBoostTime: "07:00",
+                        eveningReflectionTime: "21:00",
+                        focusDurationMinutes: selectedDuration?.minutes ?? 25,
+                        notificationsEnabled: isDailyMotivationEnabled || isEveningReflectionEnabled
+                    )
+                    let _: UserDTO = try await RiseAPIClient.shared.request(
+                        endpoint: "user/profile",
+                        method: "PUT",
+                        body: payload
+                    )
+                    RiseLogger.info("Onboarding profile successfully synchronized to server.")
+                } catch {
+                    RiseLogger.warning("Profile synchronization deferred: \(error.localizedDescription)")
                 }
-                let payload = SyncProfilePayload(
-                    name: trimmedName,
-                    focusAreas: selectedCategories.map { $0.title },
-                    onboardingComplete: true,
-                    motivationStyle: selectedMotivationStyle?.title ?? "Gentle Encouragement",
-                    morningBoostTime: "07:00",
-                    eveningReflectionTime: "21:00",
-                    focusDurationMinutes: selectedDuration?.minutes ?? 25,
-                    notificationsEnabled: isDailyMotivationEnabled || isEveningReflectionEnabled
-                )
-                let _: UserDTO = try await RiseAPIClient.shared.request(
-                    endpoint: "user/profile",
-                    method: "PUT",
-                    body: payload
-                )
-                RiseLogger.info("Onboarding profile successfully synchronized to server.")
-            } catch {
-                RiseLogger.warning("Profile synchronization deferred: \(error.localizedDescription)")
+            }
+
+            self.isCompletingOnboarding = false
+            self.isCompleted = true
+            withAnimation(.spring(response: 0.45, dampingFraction: 0.85)) {
+                appState.isOnboardingCompleted = true
             }
         }
-
-        isCompleted = true
-        appState.isOnboardingCompleted = true
     }
 }

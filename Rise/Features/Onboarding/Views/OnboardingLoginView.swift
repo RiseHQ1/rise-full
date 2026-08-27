@@ -131,7 +131,12 @@ public struct OnboardingLoginView: View {
 
                         // MARK: - Primary CTA Button ("Log in ->") Positioned Directly Below Password & Forgot Password
 
-                        RisePrimaryButton("Log in", iconName: "arrow.right", style: .gold) {
+                        RisePrimaryButton(
+                            onboardingState.isAuthenticatingEmail ? "Logging in..." : "Log in",
+                            iconName: onboardingState.isAuthenticatingEmail ? nil : "arrow.right",
+                            isLoading: onboardingState.isAuthenticatingEmail,
+                            style: .gold
+                        ) {
                             let trimmedEmail = emailInput.trimmingCharacters(in: .whitespacesAndNewlines)
                             if trimmedEmail.isEmpty || !trimmedEmail.contains("@") {
                                 onboardingState.validationErrorMessage = "Please enter a valid email address."
@@ -145,13 +150,17 @@ public struct OnboardingLoginView: View {
                             onboardingState.isAuthenticatingEmail = true
                             onboardingState.validationErrorMessage = nil
 
-                            Task {
+                            Task { @MainActor in
                                 do {
+                                    struct LoginPayload: Encodable {
+                                        let email: String
+                                        let password: String
+                                    }
                                     struct LoginResponse: Decodable {
                                         let user: UserDTO
                                         let tokens: AuthTokensDTO
                                     }
-                                    let payload = ["email": trimmedEmail, "password": passwordInput]
+                                    let payload = LoginPayload(email: trimmedEmail, password: passwordInput)
                                     let result: LoginResponse = try await RiseAPIClient.shared.request(
                                         endpoint: "auth/login",
                                         method: "POST",
@@ -166,13 +175,32 @@ public struct OnboardingLoginView: View {
                                     onboardingState.emailInput = trimmedEmail
                                     onboardingState.authProvider = .email
                                     onboardingState.isAuthenticatingEmail = false
-                                    onboardingState.completeOnboarding(appState: appState)
+                                    onboardingState.validationErrorMessage = nil
+
+                                    // Persist logged in user profile
+                                    let profile = UserProfile(
+                                        name: result.user.name,
+                                        email: trimmedEmail,
+                                        selectedFocusAreas: result.user.focusAreas?.compactMap { FocusArea(rawValue: $0.lowercased()) } ?? [.mindfulness, .productivity],
+                                        dailyReminderEnabled: true,
+                                        preferredReminderTime: Date(),
+                                        isOnboardingCompleted: true,
+                                        goals: ["Stay Consistent", "Build Discipline"],
+                                        motivationPreference: result.user.motivationStyle,
+                                        preferredRoutineTime: "Morning"
+                                    )
+                                    if let data = try? JSONEncoder().encode(profile) {
+                                        UserDefaults.standard.set(data, forKey: "saved_user_profile")
+                                    }
+
+                                    onboardingState.isCompleted = true
+                                    withAnimation(.spring(response: 0.45, dampingFraction: 0.85)) {
+                                        appState.isOnboardingCompleted = true
+                                    }
                                 } catch {
                                     onboardingState.isAuthenticatingEmail = false
-                                    RiseLogger.warning("Login fallback: \(error.localizedDescription)")
-                                    onboardingState.emailInput = trimmedEmail
-                                    onboardingState.authProvider = .email
-                                    onboardingState.currentStepIndex = OnboardingStep.summary.rawValue
+                                    RiseLogger.error("Login error: \(error.localizedDescription)")
+                                    onboardingState.validationErrorMessage = "Invalid email or password. Please check and try again."
                                 }
                             }
                         }
@@ -251,6 +279,7 @@ public struct OnboardingLoginView: View {
                                 }
                             }
                             .buttonStyle(RisePressableButtonStyle(reduceMotion: reduceMotion))
+                            .disabled(onboardingState.isAuthenticating)
 
                             // 2. Continue with Google
                             Button(action: {
@@ -261,7 +290,7 @@ public struct OnboardingLoginView: View {
                                 }
                             }) {
                                 HStack(spacing: 10) {
-                                    if onboardingState.isAuthenticating {
+                                    if onboardingState.isAuthenticatingSocial {
                                         ProgressView()
                                             .tint(.white)
                                             .frame(width: 24, height: 24)
@@ -272,7 +301,7 @@ public struct OnboardingLoginView: View {
                                             .frame(width: 24, height: 24)
                                     }
 
-                                    Text(onboardingState.isAuthenticating ? "Connecting..." : "Continue with Google")
+                                    Text(onboardingState.isAuthenticatingSocial ? "Connecting..." : "Continue with Google")
                                         .font(RiseTypography.calloutSemibold)
                                         .foregroundStyle(.white)
                                 }

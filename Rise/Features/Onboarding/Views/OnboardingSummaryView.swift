@@ -301,12 +301,18 @@ public struct OnboardingSummaryView: View {
 
                         // MARK: - Primary CTA Button ("Let's Rise ->")
 
-                        RisePrimaryButton("Let’s Rise", iconName: "arrow.right", style: .gold) {
+                        RisePrimaryButton(
+                            onboardingState.isCompletingOnboarding ? "Entering Rise..." : "Let’s Rise",
+                            iconName: onboardingState.isCompletingOnboarding ? nil : "arrow.right",
+                            isLoading: onboardingState.isCompletingOnboarding,
+                            style: .gold
+                        ) {
                             withAnimation(reduceMotion ? nil : .spring(response: 0.35, dampingFraction: 0.85)) {
                                 onboardingState.completeOnboarding(appState: appState)
                             }
                         }
                         .padding(.top, 2)
+                        .disabled(onboardingState.isCompletingOnboarding)
 
                         // Secondary Action Button ("I'll set this up later ›")
                         Button(action: {
@@ -327,6 +333,7 @@ public struct OnboardingSummaryView: View {
                             .frame(height: 38)
                         }
                         .buttonStyle(RisePressableButtonStyle(reduceMotion: reduceMotion))
+                        .disabled(onboardingState.isCompletingOnboarding)
 
                         // Footer Lock & Privacy Note
                         HStack(spacing: 4) {
