@@ -13,7 +13,7 @@ import SwiftUI
 /// 3D glossy purple heart asset, and high-contrast typography.
 public struct SplashGlassCard: View {
     public init() {}
-    
+
     public var body: some View {
         HStack(spacing: RiseSpacing.md) {
             // 3D Purple Heart Tile
@@ -23,20 +23,20 @@ public struct SplashGlassCard: View {
                 .frame(width: 54, height: 54)
                 .shadow(color: RiseColors.accentPrimary.opacity(0.35), radius: 10, x: 0, y: 4)
                 .accessibilityHidden(true)
-            
+
             // Text Content
             VStack(alignment: .leading, spacing: RiseSpacing.xxs) {
                 Text("Start your day with purpose")
                     .font(RiseTypography.headline)
                     .fontWeight(.bold)
                     .foregroundStyle(RiseColors.textPrimary)
-                
+
                 Text("Daily motivation, reflections\nand progress that matters.")
                     .font(RiseTypography.caption)
                     .foregroundStyle(RiseColors.textSecondary)
                     .lineSpacing(2)
             }
-            
+
             Spacer(minLength: 0)
         }
         .padding(.horizontal, RiseSpacing.md)
@@ -45,20 +45,20 @@ public struct SplashGlassCard: View {
             ZStack {
                 // Base dark indigo tint
                 RoundedRectangle(cornerRadius: RiseRadius.extraLarge, style: .continuous)
-                    .fill(Color(hex: "#100C24").opacity(0.72))
-                
+                    .fill(RiseColors.surfaceField.opacity(0.72))
+
                 // Translucent material layer
                 RoundedRectangle(cornerRadius: RiseRadius.extraLarge, style: .continuous)
                     .fill(.ultraThinMaterial)
                     .opacity(0.4)
-                
+
                 // Subtle purple atmospheric tint
                 RoundedRectangle(cornerRadius: RiseRadius.extraLarge, style: .continuous)
                     .fill(
                         LinearGradient(
                             colors: [
                                 RiseColors.accentPrimary.opacity(0.18),
-                                Color(hex: "#100C24").opacity(0.10)
+                                RiseColors.surfaceField.opacity(0.10),
                             ],
                             startPoint: .topLeading,
                             endPoint: .bottomTrailing
@@ -72,7 +72,7 @@ public struct SplashGlassCard: View {
                     LinearGradient(
                         colors: [
                             RiseColors.accentPrimary.opacity(0.45),
-                            RiseColors.borderSubtle.opacity(0.8)
+                            RiseColors.borderSubtle.opacity(0.8),
                         ],
                         startPoint: .topLeading,
                         endPoint: .bottomTrailing

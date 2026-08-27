@@ -16,14 +16,14 @@ public struct UserProfile: Identifiable, Hashable, Codable, Sendable {
     public var dailyReminderEnabled: Bool
     public var preferredReminderTime: Date?
     public var createdAt: Date
-    
+
     // Onboarding Personalization Preferences
     public var isOnboardingCompleted: Bool
     public var currentMood: Mood?
     public var goals: [String]
     public var motivationPreference: String?
     public var preferredRoutineTime: String?
-    
+
     public init(
         id: UUID = UUID(),
         name: String = "",

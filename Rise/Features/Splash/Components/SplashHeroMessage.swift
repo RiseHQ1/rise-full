@@ -10,7 +10,7 @@ import SwiftUI
 /// Centered supporting motivational message for the Splash screen.
 public struct SplashHeroMessage: View {
     public init() {}
-    
+
     public var body: some View {
         Text("Positive thoughts. Better days.\nStronger you.")
             .font(RiseTypography.title)

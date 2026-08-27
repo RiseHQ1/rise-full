@@ -1,0 +1,54 @@
+# Rise — keep lint helpful without blocking TestFlight archives.
+disabled_rules:
+  - trailing_comma # Conflicts with SwiftFormat's trailing-comma preference
+
+opt_in_rules:
+  - empty_count
+
+excluded:
+  - .build
+  - DerivedData
+  - .cursor-mockups
+
+identifier_name:
+  min_length:
+    warning: 2
+    error: 1
+  max_length:
+    warning: 50
+    error: 60
+  excluded:
+    - id
+    - x
+    - y
+    - r
+    - g
+    - b
+    - a
+    - i
+    - to
+    - on
+    - of
+
+type_body_length:
+  warning: 400
+  error: 800
+
+file_length:
+  warning: 600
+  error: 1200
+
+line_length:
+  warning: 160
+  error: 250
+  ignores_urls: true
+  ignores_comments: true
+
+large_tuple:
+  warning: 3
+  error: 5
+
+nesting:
+  type_level: 3
+
+reporter: xcode

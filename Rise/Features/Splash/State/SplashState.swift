@@ -5,8 +5,8 @@
 //  Created by Rise Team on 21/08/2026.
 //
 
-import SwiftUI
 import Observation
+import SwiftUI
 
 /// Presentation state and lifecycle coordinator for the Splash screen.
 @Observable
@@ -18,9 +18,9 @@ public final class SplashState {
     public var isCardVisible: Bool = false
     public var isLoadingVisible: Bool = false
     public var isCompleted: Bool = false
-    
+
     public init() {}
-    
+
     /// Starts the orchestrated entrance animations and schedules the splash completion.
     public func start(reduceMotion: Bool, onFinish: @escaping () -> Void) {
         if reduceMotion {
@@ -29,7 +29,7 @@ public final class SplashState {
             isMessageVisible = true
             isCardVisible = true
             isLoadingVisible = true
-            
+
             Task {
                 try? await Task.sleep(for: .seconds(2.5))
                 isCompleted = true
@@ -37,29 +37,29 @@ public final class SplashState {
             }
             return
         }
-        
-        // Sequenced entrance animations
-        withAnimation(RiseAnimations.standardEase) {
+
+        // Sequenced entrance animations — soft Rise signature curve.
+        withAnimation(RiseAnimations.riseIn) {
             isLogoVisible = true
         }
-        
+
         Task {
             try? await Task.sleep(for: .milliseconds(300))
-            withAnimation(RiseAnimations.interactiveSpring) {
+            withAnimation(RiseAnimations.riseIn) {
                 isTaglineVisible = true
             }
-            
+
             try? await Task.sleep(for: .milliseconds(300))
-            withAnimation(RiseAnimations.standardEase) {
+            withAnimation(RiseAnimations.riseIn) {
                 isMessageVisible = true
             }
-            
+
             try? await Task.sleep(for: .milliseconds(400))
             withAnimation(RiseAnimations.modalSpring) {
                 isCardVisible = true
                 isLoadingVisible = true
             }
-            
+
             // Allow user to appreciate the artwork before transitioning
             try? await Task.sleep(for: .seconds(2.2))
             withAnimation(RiseAnimations.standardEase) {

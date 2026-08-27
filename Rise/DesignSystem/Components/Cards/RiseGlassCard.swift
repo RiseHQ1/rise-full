@@ -7,37 +7,38 @@
 
 import SwiftUI
 
-/// Translucent card container using native Liquid Glass styling.
-///
-/// Designed for floating actions, modal sheets, contextual overlays, and select interactive tiles.
+/// Shared translucent glass card — same surface as onboarding category tiles
+/// and Home quick-action chips.
 public struct RiseGlassCard<Content: View>: View {
     public var cornerRadius: CGFloat
     public var padding: CGFloat
-    public var tintColor: Color?
+    public var isSelected: Bool
+    public var alwaysShowSpecular: Bool
     public let content: () -> Content
-    
+
     public init(
-        cornerRadius: CGFloat = RiseRadius.large,
+        cornerRadius: CGFloat = 16,
         padding: CGFloat = RiseSpacing.md,
-        tintColor: Color? = nil,
+        isSelected: Bool = false,
+        alwaysShowSpecular: Bool = true,
         @ViewBuilder content: @escaping () -> Content
     ) {
         self.cornerRadius = cornerRadius
         self.padding = padding
-        self.tintColor = tintColor
+        self.isSelected = isSelected
+        self.alwaysShowSpecular = alwaysShowSpecular
         self.content = content
     }
-    
+
     public var body: some View {
         content()
             .padding(padding)
             .frame(maxWidth: .infinity, alignment: .leading)
-            .riseGlass(
+            .riseCategoryGlass(
                 cornerRadius: cornerRadius,
-                tintColor: tintColor,
-                strokeColor: RiseColors.borderSubtle.opacity(0.8)
+                isSelected: isSelected,
+                alwaysShowSpecular: alwaysShowSpecular
             )
-            .riseShadow(RiseShadows.elevationMedium)
     }
 }
 
@@ -45,25 +46,25 @@ public struct RiseGlassCard<Content: View>: View {
     VStack(spacing: RiseSpacing.md) {
         RiseGlassCard {
             VStack(alignment: .leading, spacing: RiseSpacing.xs) {
-                Text("Native Liquid Glass Card")
+                Text("Category Glass Card")
                     .font(RiseTypography.headline)
                     .foregroundStyle(RiseColors.textPrimary)
-                Text("Translucent material surface with delicate hairline border for floating controls.")
+                Text("Shared dark glass with specular edge — Home + onboarding.")
                     .font(RiseTypography.body)
                     .foregroundStyle(RiseColors.textSecondary)
             }
         }
-        
-        RiseGlassCard(tintColor: RiseColors.accentPrimary) {
+
+        RiseGlassCard(isSelected: true, alwaysShowSpecular: false) {
             HStack(spacing: RiseSpacing.sm) {
-                Image(systemName: "sparkles")
+                Image(systemName: "checkmark.circle.fill")
                     .font(RiseTypography.title)
-                    .foregroundStyle(RiseColors.accentPrimary)
+                    .foregroundStyle(RiseColors.accentSecondary)
                 VStack(alignment: .leading, spacing: RiseSpacing.xxs) {
-                    Text("Tinted Glass Card")
+                    Text("Selected State")
                         .font(RiseTypography.headline)
                         .foregroundStyle(RiseColors.textPrimary)
-                    Text("Subtly tinted with accent color.")
+                    Text("Accent tint + stronger specular shine.")
                         .font(RiseTypography.caption)
                         .foregroundStyle(RiseColors.textSecondary)
                 }

@@ -13,14 +13,14 @@ public enum PreviewContainer {
     public static func makeContainer() -> DependencyContainer {
         return DependencyContainer.mock()
     }
-    
+
     public static func makeAppState(isOnboarded: Bool = true, tab: AppTab = .home) -> AppState {
         let state = AppState()
         state.isOnboardingCompleted = isOnboarded
         state.selectedTab = tab
         return state
     }
-    
+
     public static func makeAppRouter() -> AppRouter {
         return AppRouter()
     }

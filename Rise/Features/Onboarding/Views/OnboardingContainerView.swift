@@ -11,9 +11,11 @@ import SwiftUI
 public struct OnboardingContainerView: View {
     @Environment(AppState.self) private var appState
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
-    
+
+    @State private var topSafeAreaInset: CGFloat = 0
+
     public init() {}
-    
+
     private var progressPercentageText: String? {
         switch appState.onboardingState.currentStep {
         case .login: return nil
@@ -27,16 +29,18 @@ public struct OnboardingContainerView: View {
         default: return "100%"
         }
     }
-    
+
     public var body: some View {
         let onboardingState = appState.onboardingState
-        
+
         ZStack(alignment: .top) {
             // MARK: - 1. Base Dark Background
+
             RiseColors.backgroundPrimary
                 .ignoresSafeArea()
-            
+
             // MARK: - 2. Dynamic Screen Content Layer
+
             Group {
                 switch onboardingState.currentStep {
                 case .login:
@@ -69,8 +73,13 @@ public struct OnboardingContainerView: View {
                 reduceMotion ? nil : .easeInOut(duration: 0.30),
                 value: onboardingState.currentStepIndex
             )
-            
+
+            // Softens scroll under status bar / Dynamic Island — same as MainTabView.
+            RiseStatusBarScrim(topSafeAreaInset: topSafeAreaInset)
+                .zIndex(5)
+
             // MARK: - 3. Persistent Top Navigation Bar (Positioned 8pt below status bar)
+
             if onboardingState.currentStep != .welcome && onboardingState.currentStep != .login {
                 VStack(spacing: 0) {
                     ZStack {
@@ -81,7 +90,7 @@ public struct OnboardingContainerView: View {
                                     iconName: "chevron.left",
                                     accessibilityLabel: "Back to previous onboarding step",
                                     style: .glass,
-                                    size: 40
+                                    size: RiseIconButtonMetrics.standard
                                 ) {
                                     withAnimation(.spring(response: 0.35, dampingFraction: 0.85)) {
                                         onboardingState.previousStep()
@@ -90,20 +99,20 @@ public struct OnboardingContainerView: View {
                             }
                             Spacer()
                         }
-                        
+
                         // Centered Persistent Progress Bar
                         RiseOnboardingProgress(
                             currentStep: max(1, onboardingState.currentStepIndex - 1),
                             totalSteps: 6
                         )
                         .animation(.spring(response: 0.35, dampingFraction: 0.85), value: onboardingState.currentStepIndex)
-                        
+
                         // Percentage Text on Right
                         if let percentage = progressPercentageText {
                             HStack {
                                 Spacer()
                                 Text(percentage)
-                                    .font(.system(size: 13, weight: .bold, design: .rounded))
+                                    .font(RiseTypography.footnoteBold)
                                     .foregroundStyle(RiseColors.accentPrimary)
                             }
                         }
@@ -115,6 +124,7 @@ public struct OnboardingContainerView: View {
                 .zIndex(10) // Always remain anchored above scrolling content
             }
         }
+        .riseTrackTopSafeAreaInset($topSafeAreaInset)
     }
 }
 
@@ -122,32 +132,25 @@ public struct OnboardingContainerView: View {
 public struct OnboardingPlaceholderView: View {
     @Environment(AppState.self) private var appState
     public let step: OnboardingStep
-    
+
     public init(step: OnboardingStep) {
         self.step = step
     }
-    
+
     public var body: some View {
         let onboardingState = appState.onboardingState
-        
+
         ZStack {
             RiseColors.riseBackgroundGradient
                 .ignoresSafeArea()
-            
+
             VStack(spacing: RiseSpacing.lg) {
                 Text("Step \(step.rawValue): \(step)")
-                    .font(.system(size: 24, weight: .bold, design: .rounded))
+                    .font(RiseTypography.title)
                     .foregroundStyle(RiseColors.textPrimary)
-                
-                Button(action: {
+
+                RisePrimaryButton("Continue", iconName: "arrow.right", style: .gold) {
                     onboardingState.advanceStep()
-                }) {
-                    Text("Continue")
-                        .font(.system(size: 16, weight: .bold))
-                        .foregroundStyle(Color(hex: "#090616"))
-                        .frame(width: 200, height: 48)
-                        .background(RiseColors.accentSecondary)
-                        .clipShape(Capsule())
                 }
             }
         }

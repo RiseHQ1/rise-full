@@ -15,20 +15,20 @@ public enum RiseError: LocalizedError, Equatable {
     case serviceUnavailable(String)
     case unauthorized
     case unknown(String)
-    
+
     public var errorDescription: String? {
         switch self {
-        case .notFound(let item):
+        case let .notFound(item):
             return "Item not found: \(item)"
-        case .persistenceFailure(let message):
+        case let .persistenceFailure(message):
             return "Data storage error: \(message)"
-        case .invalidData(let message):
+        case let .invalidData(message):
             return "Invalid data format: \(message)"
-        case .serviceUnavailable(let service):
+        case let .serviceUnavailable(service):
             return "\(service) service is currently unavailable."
         case .unauthorized:
             return "Unauthorized access."
-        case .unknown(let message):
+        case let .unknown(message):
             return "An unexpected error occurred: \(message)"
         }
     }

@@ -15,7 +15,7 @@ public struct MotivationItem: Identifiable, Hashable, Codable, Sendable {
     public let category: FocusArea
     public var isFavorite: Bool
     public let date: Date
-    
+
     public init(
         id: UUID = UUID(),
         quote: String,

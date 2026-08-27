@@ -13,30 +13,43 @@ public enum RiseIconButtonStyle {
     case glass
 }
 
+/// Shared sizing tokens for circular icon controls across Rise.
+public enum RiseIconButtonMetrics {
+    /// Compact glass control used by onboarding back, Home header, and feature chrome.
+    public static let standard: CGFloat = 40
+    /// Minimum accessibility hit target around the visual control.
+    public static let minimumHitTarget: CGFloat = 44
+}
+
 /// Circular or rounded icon button with accessible hit target, rich Liquid Glass background, and haptic feedback.
 public struct RiseIconButton: View {
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
-    
+    @Environment(\.accessibilityReduceTransparency) private var reduceTransparency
+
     public let iconName: String
     public let accessibilityLabel: String
     public var style: RiseIconButtonStyle
     public var size: CGFloat
+    /// When set, bounces the symbol only when this value changes (typically a tap counter).
+    public var bounceTrigger: Int?
     public let action: () -> Void
-    
+
     public init(
         iconName: String,
         accessibilityLabel: String,
         style: RiseIconButtonStyle = .glass,
-        size: CGFloat = 44,
+        size: CGFloat = RiseIconButtonMetrics.standard,
+        bounceTrigger: Int? = nil,
         action: @escaping () -> Void
     ) {
         self.iconName = iconName
         self.accessibilityLabel = accessibilityLabel
         self.style = style
-        self.size = max(size, 44) // Guarantee minimum 44x44pt accessibility target
+        self.size = size
+        self.bounceTrigger = bounceTrigger
         self.action = action
     }
-    
+
     public var body: some View {
         Button(action: {
             let impact = UIImpactFeedbackGenerator(style: .light)
@@ -44,17 +57,24 @@ public struct RiseIconButton: View {
             action()
         }) {
             Image(systemName: iconName)
-                .font(.system(size: size * 0.42, weight: .semibold))
+                .font(RiseTypography.symbolSmall)
                 .foregroundStyle(RiseColors.textPrimary)
+                .modifier(RiseOptionalSymbolBounce(trigger: bounceTrigger))
                 .frame(width: size, height: size)
                 .background {
                     if style == .glass {
                         ZStack {
                             Circle()
-                                .fill(Color(hex: "#100C24").opacity(0.55))
-                            Circle()
-                                .fill(.ultraThinMaterial)
-                                .opacity(0.60)
+                                .fill(
+                                    reduceTransparency
+                                        ? RiseColors.surfacePrimary
+                                        : RiseColors.surfaceField.opacity(0.55)
+                                )
+                            if !reduceTransparency {
+                                Circle()
+                                    .fill(.ultraThinMaterial)
+                                    .opacity(0.60)
+                            }
                             Circle()
                                 .fill(RiseColors.accentPrimary.opacity(0.12))
                         }
@@ -70,7 +90,7 @@ public struct RiseIconButton: View {
                                 ? LinearGradient(
                                     colors: [
                                         RiseColors.accentPrimary.opacity(0.40),
-                                        RiseColors.borderSubtle.opacity(0.60)
+                                        RiseColors.borderHairline,
                                     ],
                                     startPoint: .topLeading,
                                     endPoint: .bottomTrailing
@@ -81,9 +101,17 @@ public struct RiseIconButton: View {
                 }
                 .clipShape(Circle())
                 .riseShadow(style == .glass ? RiseShadows.elevationMedium : RiseShadows.elevationLow)
+                .frame(
+                    width: max(size, RiseIconButtonMetrics.minimumHitTarget),
+                    height: max(size, RiseIconButtonMetrics.minimumHitTarget)
+                )
+                .contentShape(Rectangle())
         }
         .buttonStyle(RisePressableButtonStyle(reduceMotion: reduceMotion))
         .accessibilityLabel(accessibilityLabel)
+        .accessibilityIdentifier(
+            iconName == "chevron.left" ? RiseAccessibilityID.featureBack : "rise.icon.\(iconName)"
+        )
     }
 }
 

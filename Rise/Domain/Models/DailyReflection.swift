@@ -14,7 +14,7 @@ public struct DailyReflection: Identifiable, Hashable, Codable, Sendable {
     public var prompt: String
     public var response: String
     public var eveningMood: Mood?
-    
+
     public init(
         id: UUID = UUID(),
         date: Date = Date(),

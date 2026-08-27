@@ -1,0 +1,143 @@
+# ==========================================
+# Rise Platform — Production Docker Compose
+# Orchestrates API, Worker, Database, Redis & Admin
+# ==========================================
+
+services:
+  # ----------------------------------------
+  # 1. PostgreSQL 16 Database
+  # ----------------------------------------
+  postgres:
+    image: postgres:16-alpine
+    container_name: rise-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-rise_admin}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-RiseSecureDBPass2026!}
+      POSTGRES_DB: ${POSTGRES_DB:-rise_production}
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-rise_admin} -d ${POSTGRES_DB:-rise_production}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - rise-network
+
+  # ----------------------------------------
+  # 2. Redis 7 (BullMQ & Rate Limiting)
+  # ----------------------------------------
+  redis:
+    image: redis:7-alpine
+    container_name: rise-redis
+    restart: unless-stopped
+    command: ["redis-server", "--appendonly", "yes", "--requirepass", "${REDIS_PASSWORD:-RiseSecureRedisPass2026!}"]
+    ports:
+      - "${REDIS_PORT:-6379}:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "-a", "${REDIS_PASSWORD:-RiseSecureRedisPass2026!}", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - rise-network
+
+  # ----------------------------------------
+  # 3. Fastify REST API Engine
+  # ----------------------------------------
+  api:
+    build:
+      context: ./RiseServer
+      dockerfile: Dockerfile
+    container_name: rise-api
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      PORT: 3000
+      HOST: 0.0.0.0
+      DATABASE_URL: postgresql://${POSTGRES_USER:-rise_admin}:${POSTGRES_PASSWORD:-RiseSecureDBPass2026!}@postgres:5432/${POSTGRES_DB:-rise_production}?schema=public
+      REDIS_URL: redis://:${REDIS_PASSWORD:-RiseSecureRedisPass2026!}@redis:6379
+      JWT_SECRET: ${JWT_SECRET:-rise_jwt_super_secret_production_key_2026_x89}
+      JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET:-rise_refresh_super_secret_production_key_2026_y90}
+      ADMIN_API_KEY: ${ADMIN_API_KEY:-rise_admin_master_secret_key_2026}
+      ENCRYPTION_KEY: ${ENCRYPTION_KEY:-0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef}
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
+      REVENUECAT_WEBHOOK_AUTH: ${REVENUECAT_WEBHOOK_AUTH:-rise_rc_webhook_secret_2026}
+      APNS_KEY_ID: ${APNS_KEY_ID:-}
+      APNS_TEAM_ID: ${APNS_TEAM_ID:-}
+      APNS_BUNDLE_ID: ${APNS_BUNDLE_ID:-com.riseapp.ios}
+    ports:
+      - "3000:3000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - rise-network
+
+  # ----------------------------------------
+  # 4. BullMQ Queue Worker (APNs & AI Tasks)
+  # ----------------------------------------
+  worker:
+    build:
+      context: ./RiseServer
+      dockerfile: Dockerfile
+    container_name: rise-worker
+    restart: unless-stopped
+    command: ["node", "dist/workers/index.js"]
+    environment:
+      NODE_ENV: production
+      DATABASE_URL: postgresql://${POSTGRES_USER:-rise_admin}:${POSTGRES_PASSWORD:-RiseSecureDBPass2026!}@postgres:5432/${POSTGRES_DB:-rise_production}?schema=public
+      REDIS_URL: redis://:${REDIS_PASSWORD:-RiseSecureRedisPass2026!}@redis:6379
+      JWT_SECRET: ${JWT_SECRET:-rise_jwt_super_secret_production_key_2026_x89}
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
+      APNS_KEY_ID: ${APNS_KEY_ID:-}
+      APNS_TEAM_ID: ${APNS_TEAM_ID:-}
+      APNS_BUNDLE_ID: ${APNS_BUNDLE_ID:-com.riseapp.ios}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - rise-network
+
+  # ----------------------------------------
+  # 5. Rise Admin & CMS Dashboard Web Server
+  # ----------------------------------------
+  admin:
+    image: node:20-alpine
+    container_name: rise-admin
+    restart: unless-stopped
+    working_dir: /app
+    volumes:
+      - ./RiseAdmin:/app
+    command: ["npx", "-y", "serve", "-s", ".", "-p", "4173"]
+    ports:
+      - "4173:4173"
+    networks:
+      - rise-network
+
+# ------------------------------------------
+# Persistent Volumes
+# ------------------------------------------
+volumes:
+  postgres_data:
+    driver: local
+  redis_data:
+    driver: local
+
+# ------------------------------------------
+# Internal Isolated Network
+# ------------------------------------------
+networks:
+  rise-network:
+    driver: bridge

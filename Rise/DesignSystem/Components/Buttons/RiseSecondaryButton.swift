@@ -11,11 +11,11 @@ import SwiftUI
 public struct RiseSecondaryButton: View {
     @Environment(\.isEnabled) private var isEnabled
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
-    
+
     public let title: String
     public let iconName: String?
     public let action: () -> Void
-    
+
     public init(
         _ title: String,
         iconName: String? = nil,
@@ -25,7 +25,7 @@ public struct RiseSecondaryButton: View {
         self.iconName = iconName
         self.action = action
     }
-    
+
     public var body: some View {
         Button(action: {
             let impact = UIImpactFeedbackGenerator(style: .light)

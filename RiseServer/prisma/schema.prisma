@@ -1,0 +1,322 @@
+//
+//  schema.prisma
+//  RiseServer
+//
+//  Production PostgreSQL schema for Rise Backend
+//
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  USER
+  CURATOR
+  ADMIN
+}
+
+enum SubscriptionTier {
+  FREE
+  PRO_MONTHLY
+  PRO_ANNUAL
+  LIFETIME
+}
+
+enum AuthProvider {
+  EMAIL
+  APPLE
+}
+
+enum MoodType {
+  GREAT
+  CALM
+  OKAY
+  LOW
+  TIRED
+}
+
+model User {
+  id                     String           @id @default(uuid()) @db.Uuid
+  email                  String?          @unique
+  passwordHash           String?          @map("password_hash")
+  appleUserId            String?          @unique @map("apple_user_id")
+  authProvider           AuthProvider     @default(EMAIL) @map("auth_provider")
+  role                   UserRole         @default(USER)
+  name                   String           @default("Friend")
+  avatarUrl              String?          @map("avatar_url")
+  timeZone               String           @default("UTC") @map("time_zone")
+  isEmailVerified        Boolean          @default(false) @map("is_email_verified")
+  
+  // Onboarding & Focus Areas
+  focusAreas             String[]         @default(["Mindfulness", "Focus"]) @map("focus_areas")
+  onboardingComplete     Boolean          @default(false) @map("onboarding_complete")
+  
+  // Notification Routine Preferences
+  morningBoostTime       String           @default("07:00") @map("morning_boost_time")
+  eveningReflectionTime  String           @default("21:00") @map("evening_reflection_time")
+  focusDurationMinutes   Int              @default(25) @map("focus_duration_minutes")
+  motivationStyle        String           @default("Gentle Encouragement") @map("motivation_style")
+  notificationsEnabled   Boolean          @default(true) @map("notifications_enabled")
+  
+  // Subscription & RevenueCat Entitlements
+  subscriptionTier       SubscriptionTier @default(FREE) @map("subscription_tier")
+  subscriptionExpiresAt  DateTime?        @map("subscription_expires_at")
+  revenueCatAppUserId    String?          @unique @map("revenue_cat_app_user_id")
+  
+  createdAt              DateTime         @default(now()) @map("created_at")
+  updatedAt              DateTime         @updatedAt @map("updated_at")
+  deletedAt              DateTime?        @map("deleted_at")
+
+  // Relations
+  refreshTokens          RefreshToken[]
+  passwordResetTokens    PasswordResetToken[]
+  deviceTokens           DeviceToken[]
+  journalEntries         JournalEntry[]
+  savedContents          SavedContent[]
+  dailyIntentions        DailyIntention[]
+  packProgress           PackProgress[]
+  userProgress           UserProgress?
+  subscriptionEvents     SubscriptionEvent[]
+
+  @@index([email])
+  @@index([appleUserId])
+  @@index([subscriptionTier])
+  @@map("users")
+}
+
+model PasswordResetToken {
+  id        String   @id @default(uuid()) @db.Uuid
+  userId    String   @db.Uuid @map("user_id")
+  tokenHash String   @unique @map("token_hash")
+  expiresAt DateTime @map("expires_at")
+  isUsed    Boolean  @default(false) @map("is_used")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([tokenHash])
+  @@map("password_reset_tokens")
+}
+
+model RefreshToken {
+  id           String    @id @default(uuid()) @db.Uuid
+  tokenHash    String    @unique @map("token_hash")
+  userId       String    @db.Uuid @map("user_id")
+  deviceId     String?   @map("device_id")
+  userAgent    String?   @map("user_agent")
+  ipAddress    String?   @map("ip_address")
+  isRevoked    Boolean   @default(false) @map("is_revoked")
+  expiresAt    DateTime  @map("expires_at")
+  createdAt    DateTime  @default(now()) @map("created_at")
+
+  user         User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([tokenHash])
+  @@map("refresh_tokens")
+}
+
+model DeviceToken {
+  id        String   @id @default(uuid()) @db.Uuid
+  userId    String   @db.Uuid @map("user_id")
+  token     String   @unique
+  platform  String   @default("iOS")
+  isActive  Boolean  @default(true) @map("is_active")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("device_tokens")
+}
+
+model JournalEntry {
+  id                 String    @id @default(uuid()) @db.Uuid
+  syncId             String    @db.Uuid @map("sync_id")
+  userId             String    @db.Uuid @map("user_id")
+  mood               MoodType  @default(GREAT)
+  prompt             String?
+  encryptedContent   String?   @map("encrypted_content") @db.Text
+  iv                 String?
+  authTag            String?   @map("auth_tag")
+  plainTextFallback  String?   @map("plain_text_fallback") @db.Text
+  tags               String[]  @default([])
+  clientCreatedAt    DateTime  @map("client_created_at")
+  clientUpdatedAt    DateTime  @map("client_updated_at")
+  serverUpdatedAt    DateTime  @updatedAt @map("server_updated_at")
+  version            Int       @default(1)
+  isDeleted          Boolean   @default(false) @map("is_deleted")
+
+  user               User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, syncId])
+  @@index([userId, clientUpdatedAt])
+  @@index([userId, isDeleted])
+  @@map("journal_entries")
+}
+
+model SavedContent {
+  id              String    @id @default(uuid()) @db.Uuid
+  syncId          String    @db.Uuid @map("sync_id")
+  userId          String    @db.Uuid @map("user_id")
+  title           String
+  subtitle        String?
+  category        String    @default("Quote")
+  assetName       String    @default("onboarding_motivation_bg") @map("asset_name")
+  isFavorite      Boolean   @default(true) @map("is_favorite")
+  clientUpdatedAt DateTime  @map("client_updated_at")
+  serverUpdatedAt DateTime  @updatedAt @map("server_updated_at")
+  version         Int       @default(1)
+  isDeleted       Boolean   @default(false) @map("is_deleted")
+
+  user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, syncId])
+  @@index([userId, clientUpdatedAt])
+  @@map("saved_contents")
+}
+
+model DailyIntention {
+  id              String    @id @default(uuid()) @db.Uuid
+  syncId          String    @db.Uuid @map("sync_id")
+  userId          String    @db.Uuid @map("user_id")
+  date            String    // YYYY-MM-DD
+  text            String    @db.Text
+  category        String    @default("Focus")
+  isCustom        Boolean   @default(false) @map("is_custom")
+  isCompleted     Boolean   @default(false) @map("is_completed")
+  completedAt     DateTime? @map("completed_at")
+  clientCreatedAt DateTime  @map("client_created_at")
+  clientUpdatedAt DateTime  @map("client_updated_at")
+  serverUpdatedAt DateTime  @updatedAt @map("server_updated_at")
+  version         Int       @default(1)
+  isDeleted       Boolean   @default(false) @map("is_deleted")
+
+  user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, syncId])
+  @@index([userId, date])
+  @@index([userId, clientUpdatedAt])
+  @@map("daily_intentions")
+}
+
+model RisePack {
+  id                 String         @id @default(uuid()) @db.Uuid
+  slug               String         @unique
+  title              String
+  subtitle           String?
+  description        String         @db.Text
+  heroArtwork        String         @default("pack_morning_reset") @map("hero_artwork")
+  theme              String?
+  category           String         @default("Growth")
+  durationDays       Int            @default(7) @map("duration_days")
+  accessLevel        String         @default("FREE") @map("access_level") // "FREE", "PRO", "STOREKIT_PURCHASE"
+  storeKitProductId  String?        @map("storekit_product_id")
+  priceTier          String?        @map("price_tier")
+  version            Int            @default(1)
+  items              Json           // Array of curriculum items
+  isPublished        Boolean        @default(true) @map("is_published")
+  createdAt          DateTime       @default(now()) @map("created_at")
+  updatedAt          DateTime       @updatedAt @map("updated_at")
+
+  packProgress       PackProgress[]
+
+  @@index([category])
+  @@index([accessLevel])
+  @@map("rise_packs")
+}
+
+model PackProgress {
+  id               String    @id @default(uuid()) @db.Uuid
+  userId           String    @db.Uuid @map("user_id")
+  packId           String    @db.Uuid @map("pack_id")
+  completedItemIds String[]  @default([]) @map("completed_item_ids")
+  currentDay       Int       @default(1) @map("current_day")
+  isCompleted      Boolean   @default(false) @map("is_completed")
+  completedAt      DateTime? @map("completed_at")
+  lastEngagedAt    DateTime  @default(now()) @map("last_engaged_at")
+  createdAt        DateTime  @default(now()) @map("created_at")
+  updatedAt        DateTime  @updatedAt @map("updated_at")
+
+  user             User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  pack             RisePack  @relation(fields: [packId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, packId])
+  @@index([userId])
+  @@map("pack_progress")
+}
+
+model Affirmation {
+  id         String   @id @default(uuid()) @db.Uuid
+  text       String   @db.Text
+  category   String
+  tags       String[] @default([])
+  accessLevel String  @default("FREE") @map("access_level")
+  dayOfYear  Int?     @map("day_of_year")
+  assetName  String   @default("onboarding_motivation_bg") @map("asset_name")
+  createdAt  DateTime @default(now()) @map("created_at")
+
+  @@index([category])
+  @@index([dayOfYear])
+  @@map("affirmations")
+}
+
+model UserProgress {
+  id               String   @id @default(uuid()) @db.Uuid
+  userId           String   @unique @db.Uuid @map("user_id")
+  currentStreak    Int      @default(0) @map("current_streak")
+  bestStreak       Int      @default(0) @map("best_streak")
+  mindfulMinutes   Int      @default(0) @map("mindful_minutes")
+  lastActiveDate   DateTime @default(now()) @map("last_active_date")
+  reflectionCount  Int      @default(0) @map("reflection_count")
+  focusCount       Int      @default(0) @map("focus_count")
+  weeklyActivity   Json?    @map("weekly_activity")
+  createdAt        DateTime @default(now()) @map("created_at")
+  updatedAt        DateTime @updatedAt @map("updated_at")
+
+  user             User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("user_progress")
+}
+
+model MotivationQuote {
+  id         String   @id @default(uuid()) @db.Uuid
+  quote      String   @db.Text
+  author     String
+  category   String
+  tags       String[] @default([])
+  assetName  String   @default("onboarding_motivation_bg") @map("asset_name")
+  dayOfYear  Int?     @map("day_of_year")
+  isFeatured Boolean  @default(false) @map("is_featured")
+  createdAt  DateTime @default(now()) @map("created_at")
+
+  @@index([category])
+  @@index([dayOfYear])
+  @@index([isFeatured])
+  @@map("motivation_quotes")
+}
+
+model SubscriptionEvent {
+  id                    String   @id @default(uuid()) @db.Uuid
+  userId                String?  @db.Uuid @map("user_id")
+  eventType             String   @map("event_type")
+  originalTransactionId String?  @map("original_transaction_id")
+  productId             String?  @map("product_id")
+  purchasedAt           DateTime? @map("purchased_at")
+  expiresAt             DateTime? @map("expires_at")
+  rawPayload            Json     @map("raw_payload")
+  createdAt             DateTime @default(now()) @map("created_at")
+
+  user                  User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([userId])
+  @@index([originalTransactionId])
+  @@map("subscription_events")
+}

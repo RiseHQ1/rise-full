@@ -13,7 +13,7 @@ public struct RiseSectionHeader: View {
     public let subtitle: String?
     public let actionTitle: String?
     public let action: (() -> Void)?
-    
+
     public init(
         title: String,
         subtitle: String? = nil,
@@ -25,14 +25,14 @@ public struct RiseSectionHeader: View {
         self.actionTitle = actionTitle
         self.action = action
     }
-    
+
     public var body: some View {
         HStack(alignment: .bottom, spacing: RiseSpacing.sm) {
             VStack(alignment: .leading, spacing: RiseSpacing.xxs) {
                 Text(title)
                     .font(RiseTypography.title)
                     .foregroundStyle(RiseColors.textPrimary)
-                
+
                 if let subtitle {
                     Text(subtitle)
                         .font(RiseTypography.subheadline)
@@ -40,7 +40,7 @@ public struct RiseSectionHeader: View {
                 }
             }
             .frame(maxWidth: .infinity, alignment: .leading)
-            
+
             if let actionTitle, let action {
                 Button(action: {
                     let impact = UIImpactFeedbackGenerator(style: .light)
@@ -69,7 +69,7 @@ public struct RiseSectionHeader: View {
             title: "Daily Motivation",
             subtitle: "Handpicked insights to begin your morning"
         )
-        
+
         RiseSectionHeader(
             title: "Recent Entries",
             actionTitle: "See All"

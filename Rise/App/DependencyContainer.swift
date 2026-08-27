@@ -10,17 +10,19 @@ import SwiftUI
 /// Lightweight dependency container providing protocol-oriented services and repositories.
 public final class DependencyContainer: @unchecked Sendable {
     // MARK: - Services
+
     public let contentService: ContentServiceProtocol
     public let notificationService: NotificationServiceProtocol
     public let audioService: AudioServiceProtocol
     public let hapticService: HapticServiceProtocol
     public let analyticsService: AnalyticsServiceProtocol
-    
+
     // MARK: - Repositories & Persistence
+
     public let contentRepository: ContentRepositoryProtocol
     public let userProfileRepository: UserProfileRepositoryProtocol
     public let persistenceController: PersistenceController
-    
+
     public init(
         contentService: ContentServiceProtocol,
         notificationService: NotificationServiceProtocol,
@@ -40,13 +42,13 @@ public final class DependencyContainer: @unchecked Sendable {
         self.userProfileRepository = userProfileRepository
         self.persistenceController = persistenceController
     }
-    
+
     /// Production dependency container configured with default implementations.
     public static func live() -> DependencyContainer {
         let contentRepo = DefaultContentRepository()
         let userRepo = DefaultUserProfileRepository()
         let persistence = PersistenceController.shared
-        
+
         return DependencyContainer(
             contentService: ContentService(contentRepository: contentRepo),
             notificationService: NotificationService(),
@@ -58,13 +60,13 @@ public final class DependencyContainer: @unchecked Sendable {
             persistenceController: persistence
         )
     }
-    
+
     /// Mock dependency container configured for SwiftUI Previews and Unit Tests.
     public static func mock() -> DependencyContainer {
         let contentRepo = DefaultContentRepository()
         let userRepo = DefaultUserProfileRepository()
         let persistence = PersistenceController.preview
-        
+
         return DependencyContainer(
             contentService: ContentService(contentRepository: contentRepo),
             notificationService: NotificationService(),
@@ -79,6 +81,7 @@ public final class DependencyContainer: @unchecked Sendable {
 }
 
 // MARK: - SwiftUI Environment Integration
+
 private struct DependencyContainerKey: EnvironmentKey {
     static let defaultValue: DependencyContainer = .live()
 }

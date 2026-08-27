@@ -12,7 +12,7 @@ public struct RiseCardBackgroundModifier: ViewModifier {
     public var cornerRadius: CGFloat
     public var backgroundColor: Color
     public var borderColor: Color
-    
+
     public init(
         cornerRadius: CGFloat = RiseRadius.large,
         backgroundColor: Color = RiseColors.surfacePrimary,
@@ -22,7 +22,7 @@ public struct RiseCardBackgroundModifier: ViewModifier {
         self.backgroundColor = backgroundColor
         self.borderColor = borderColor
     }
-    
+
     public func body(content: Content) -> some View {
         content
             .background {
@@ -43,7 +43,7 @@ public extension View {
         backgroundColor: Color = RiseColors.surfacePrimary,
         borderColor: Color = RiseColors.borderSubtle
     ) -> some View {
-        self.modifier(
+        modifier(
             RiseCardBackgroundModifier(
                 cornerRadius: cornerRadius,
                 backgroundColor: backgroundColor,

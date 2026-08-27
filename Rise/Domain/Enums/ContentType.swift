@@ -14,9 +14,11 @@ public enum ContentType: String, CaseIterable, Identifiable, Hashable, Codable, 
     case meditation
     case breathwork
     case reflection
-    
-    public var id: String { rawValue }
-    
+
+    public var id: String {
+        rawValue
+    }
+
     public var displayName: String {
         switch self {
         case .motivation: return "Daily Motivation"

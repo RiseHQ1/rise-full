@@ -14,7 +14,7 @@ import SwiftUI
 public struct RiseOnboardingProgress: View {
     public let currentStep: Int
     public let totalSteps: Int
-    
+
     public init(
         currentStep: Int,
         totalSteps: Int = 4
@@ -22,33 +22,35 @@ public struct RiseOnboardingProgress: View {
         self.currentStep = currentStep
         self.totalSteps = totalSteps
     }
-    
+
     public var body: some View {
         HStack(spacing: 6) {
-            ForEach(1...totalSteps, id: \.self) { step in
+            ForEach(1 ... totalSteps, id: \.self) { step in
                 if step < currentStep {
                     // MARK: - Completed Step: Purple Glass Circular Checkmark Badge
+
                     ZStack {
                         Circle()
                             .fill(Color(hex: "#8B5CF6").opacity(0.35))
                             .frame(width: 18, height: 18)
-                        
+
                         Circle()
                             .stroke(Color(hex: "#8B5CF6").opacity(0.60), lineWidth: 1)
                             .frame(width: 18, height: 18)
-                        
+
                         Image(systemName: "checkmark")
-                            .font(.system(size: 9, weight: .bold))
+                            .font(RiseTypography.microBold)
                             .foregroundStyle(Color.white)
                     }
                 } else if step == currentStep {
                     // MARK: - Current Step: Active Gold Capsule
+
                     Capsule()
                         .fill(
                             LinearGradient(
                                 colors: [
-                                    Color(hex: "#FFD868"),
-                                    Color(hex: "#F59E0B")
+                                    RiseColors.accentGold,
+                                    RiseColors.accentSecondary,
                                 ],
                                 startPoint: .leading,
                                 endPoint: .trailing
@@ -57,6 +59,7 @@ public struct RiseOnboardingProgress: View {
                         .frame(width: 28, height: 4)
                 } else {
                     // MARK: - Upcoming Step: Muted Glass Capsule
+
                     Capsule()
                         .fill(Color.white.opacity(0.18))
                         .frame(width: 28, height: 4)

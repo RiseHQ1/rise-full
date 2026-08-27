@@ -16,7 +16,7 @@ public struct RiseSurfaceCard<Content: View>: View {
     public var backgroundColor: Color
     public var borderColor: Color
     public let content: () -> Content
-    
+
     public init(
         cornerRadius: CGFloat = RiseRadius.large,
         padding: CGFloat = RiseSpacing.md,
@@ -30,7 +30,7 @@ public struct RiseSurfaceCard<Content: View>: View {
         self.borderColor = borderColor
         self.content = content
     }
-    
+
     public var body: some View {
         content()
             .padding(padding)

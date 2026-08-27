@@ -12,7 +12,7 @@ public enum AppConstants {
     public static let appName = "Rise"
     public static let appVersion = "1.0.0"
     public static let bundleIdentifier = "com.riseapp.Rise"
-    
+
     public enum StorageKeys {
         public static let hasCompletedOnboarding = "has_completed_onboarding"
         public static let userProfile = "user_profile"

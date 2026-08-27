@@ -16,7 +16,7 @@ public struct RiseEmptyState: View {
     public let message: String
     public let actionTitle: String?
     public let action: (() -> Void)?
-    
+
     public init(
         iconName: String,
         isSystemIcon: Bool = true,
@@ -32,7 +32,7 @@ public struct RiseEmptyState: View {
         self.actionTitle = actionTitle
         self.action = action
     }
-    
+
     public var body: some View {
         VStack(spacing: RiseSpacing.lg) {
             ZStack {
@@ -44,10 +44,10 @@ public struct RiseEmptyState: View {
                             .stroke(RiseColors.borderSubtle, lineWidth: 1)
                     }
                     .riseShadow(RiseShadows.accentGlow)
-                
+
                 if isSystemIcon {
                     Image(systemName: iconName)
-                        .font(.system(size: 36, weight: .light))
+                        .font(RiseTypography.symbolLarge)
                         .foregroundStyle(RiseColors.accentPrimary)
                 } else {
                     Image(iconName)
@@ -57,20 +57,20 @@ public struct RiseEmptyState: View {
                 }
             }
             .padding(.bottom, RiseSpacing.xs)
-            
+
             VStack(spacing: RiseSpacing.xs) {
                 Text(title)
                     .font(RiseTypography.title)
                     .foregroundStyle(RiseColors.textPrimary)
                     .multilineTextAlignment(.center)
-                
+
                 Text(message)
                     .font(RiseTypography.body)
                     .foregroundStyle(RiseColors.textSecondary)
                     .multilineTextAlignment(.center)
                     .padding(.horizontal, RiseSpacing.md)
             }
-            
+
             if let actionTitle, let action {
                 RisePrimaryButton(actionTitle, action: action)
                     .padding(.top, RiseSpacing.sm)
@@ -80,6 +80,8 @@ public struct RiseEmptyState: View {
         .frame(maxWidth: .infinity)
         .padding(RiseSpacing.xl)
         .accessibilityElement(children: .combine)
+        .accessibilityLabel("\(title). \(message)")
+        .accessibilityAddTraits(.isStaticText)
     }
 }
 

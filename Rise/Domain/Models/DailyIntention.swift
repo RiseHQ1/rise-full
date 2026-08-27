@@ -14,7 +14,7 @@ public struct DailyIntention: Identifiable, Hashable, Codable, Sendable {
     public var text: String
     public var focusArea: FocusArea
     public var isCompleted: Bool
-    
+
     public init(
         id: UUID = UUID(),
         date: Date = Date(),

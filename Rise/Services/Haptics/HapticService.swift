@@ -10,7 +10,7 @@ import UIKit
 /// Concrete implementation of HapticServiceProtocol using UIKit feedback generators.
 public final class HapticService: HapticServiceProtocol, @unchecked Sendable {
     public init() {}
-    
+
     @MainActor
     public func impact(style: HapticStyle) {
         let feedbackStyle: UIImpactFeedbackGenerator.FeedbackStyle
@@ -25,7 +25,7 @@ public final class HapticService: HapticServiceProtocol, @unchecked Sendable {
         generator.prepare()
         generator.impactOccurred()
     }
-    
+
     @MainActor
     public func notification(type: HapticNotificationType) {
         let feedbackType: UINotificationFeedbackGenerator.FeedbackType
@@ -38,11 +38,31 @@ public final class HapticService: HapticServiceProtocol, @unchecked Sendable {
         generator.prepare()
         generator.notificationOccurred(feedbackType)
     }
-    
+
     @MainActor
     public func selection() {
         let generator = UISelectionFeedbackGenerator()
         generator.prepare()
         generator.selectionChanged()
+    }
+}
+
+/// Global static convenience access for haptic triggers across Rise views.
+public enum RiseHaptic {
+    private static let service = HapticService()
+
+    @MainActor
+    public static func impact(_ style: HapticStyle = .light) {
+        service.impact(style: style)
+    }
+
+    @MainActor
+    public static func notification(_ type: HapticNotificationType) {
+        service.notification(type: type)
+    }
+
+    @MainActor
+    public static func selection() {
+        service.selection()
     }
 }

@@ -5,8 +5,8 @@
 //  Created by Rise Team on 21/08/2026.
 //
 
-import SwiftUI
 import Observation
+import SwiftUI
 
 /// Strongly-typed app-level routes for major application navigation.
 public enum AppRoute: Hashable, Sendable {
@@ -14,34 +14,84 @@ public enum AppRoute: Hashable, Sendable {
     case savedContent
     case motivationDetail(MotivationItem)
     case focusAreaDetail(FocusArea)
+
+    // MARK: - Phase 2 feature screens
+
+    case needSomethingNow(moodTitle: String)
+    case search
+    case motivationCategories
+    case dailyIntention
+    case intentionComplete
+    case morningBoost
+    case affirmations
+    case affirmationReader(initialId: UUID)
+    case breatheReset
+    case eveningReflection
+    case journalHistory
+    case newJournalEntry
+    case journalEntryDetail(title: String)
+    case saved
+    case savedMotivation
+    case notifications
+
+    // MARK: - Profile sub-screens
+
+    case notificationPreferences
+    case reminderSchedule
+    case languageSettings
+    case personalInformation
+    case privacySecurity
+    case backupRestore
+    case editStatusQuote
+    case risePlanEdit
+    case manageFocusAreas
 }
 
 /// Centralized app-level router coordinating root flow transitions and major cross-feature navigation.
-/// Individual feature views retain local navigation state where appropriate.
 @Observable
 @MainActor
 public final class AppRouter {
-    /// Navigation paths maintained per root tab.
     public var homePath = NavigationPath()
     public var discoverPath = NavigationPath()
     public var journalPath = NavigationPath()
     public var progressPath = NavigationPath()
     public var profilePath = NavigationPath()
-    
+
     public init() {}
-    
-    /// Returns the NavigationPath binding corresponding to a given tab.
-    public func path(for tab: AppTab) -> NavigationPath {
+
+    public func binding(for tab: AppTab) -> Binding<NavigationPath> {
+        Binding(
+            get: {
+                switch tab {
+                case .home: return self.homePath
+                case .discover: return self.discoverPath
+                case .journal: return self.journalPath
+                case .progress: return self.progressPath
+                case .profile: return self.profilePath
+                }
+            },
+            set: { newValue in
+                switch tab {
+                case .home: self.homePath = newValue
+                case .discover: self.discoverPath = newValue
+                case .journal: self.journalPath = newValue
+                case .progress: self.progressPath = newValue
+                case .profile: self.profilePath = newValue
+                }
+            }
+        )
+    }
+
+    public func push(_ route: AppRoute, on tab: AppTab) {
         switch tab {
-        case .home: return homePath
-        case .discover: return discoverPath
-        case .journal: return journalPath
-        case .progress: return progressPath
-        case .profile: return profilePath
+        case .home: homePath.append(route)
+        case .discover: discoverPath.append(route)
+        case .journal: journalPath.append(route)
+        case .progress: progressPath.append(route)
+        case .profile: profilePath.append(route)
         }
     }
-    
-    /// Resets navigation path back to root for the specified tab.
+
     public func popToRoot(for tab: AppTab) {
         switch tab {
         case .home: homePath = NavigationPath()

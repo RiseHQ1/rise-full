@@ -1,0 +1,33 @@
+//
+//  constants.ts
+//  RiseServer
+//
+//  Centralized constants and default values
+//
+
+export const APP_CONSTANTS = {
+  APP_NAME: 'Rise',
+  VERSION: '1.0.0',
+  DEFAULT_TIMEZONE: 'UTC',
+  MAX_JOURNAL_TAGS: 10,
+  DEFAULT_PAGINATION_LIMIT: 20,
+  MAX_PAGINATION_LIMIT: 100,
+  PASSWORD_SALT_LENGTH: 16,
+  ARGON2_OPTIONS: {
+    memoryCost: 65536,
+    timeCost: 3,
+    parallelism: 4,
+  },
+  SUBSCRIPTION_TIERS: {
+    FREE: 'FREE',
+    PRO_MONTHLY: 'PRO_MONTHLY',
+    PRO_ANNUAL: 'PRO_ANNUAL',
+    LIFETIME: 'LIFETIME',
+  },
+  NOTIFICATION_TYPES: {
+    MORNING_BOOST: 'MORNING_BOOST',
+    EVENING_REFLECTION: 'EVENING_REFLECTION',
+    STREAK_REMINDER: 'STREAK_REMINDER',
+    CONTENT_SYNC: 'CONTENT_SYNC',
+  },
+} as const;

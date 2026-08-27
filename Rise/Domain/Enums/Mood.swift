@@ -15,9 +15,11 @@ public enum Mood: String, CaseIterable, Identifiable, Hashable, Codable, Sendabl
     case reflective
     case stressed
     case unfocused
-    
-    public var id: String { rawValue }
-    
+
+    public var id: String {
+        rawValue
+    }
+
     public var displayName: String {
         switch self {
         case .peaceful: return "Peaceful"
@@ -28,7 +30,7 @@ public enum Mood: String, CaseIterable, Identifiable, Hashable, Codable, Sendabl
         case .unfocused: return "Unfocused"
         }
     }
-    
+
     public var emoji: String {
         switch self {
         case .peaceful: return "🕊️"

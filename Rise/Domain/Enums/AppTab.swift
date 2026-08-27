@@ -14,9 +14,11 @@ public enum AppTab: String, CaseIterable, Identifiable, Hashable, Sendable {
     case journal
     case progress
     case profile
-    
-    public var id: String { rawValue }
-    
+
+    public var id: String {
+        rawValue
+    }
+
     public var title: String {
         switch self {
         case .home: return "Home"
@@ -26,14 +28,14 @@ public enum AppTab: String, CaseIterable, Identifiable, Hashable, Sendable {
         case .profile: return "Profile"
         }
     }
-    
+
     public var systemIconName: String {
         switch self {
-        case .home: return "sun.horizon"
+        case .home: return "house.fill"
         case .discover: return "sparkles"
         case .journal: return "book.closed"
-        case .progress: return "chart.line.uptrend.xyaxis"
-        case .profile: return "person"
+        case .progress: return "chart.bar.fill"
+        case .profile: return "person.fill"
         }
     }
 }

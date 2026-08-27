@@ -13,7 +13,7 @@ public struct Affirmation: Identifiable, Hashable, Codable, Sendable {
     public let text: String
     public let category: FocusArea
     public var isFavorite: Bool
-    
+
     public init(
         id: UUID = UUID(),
         text: String,

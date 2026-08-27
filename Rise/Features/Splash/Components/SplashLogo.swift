@@ -10,11 +10,11 @@ import SwiftUI
 /// Prominent branding header for the Splash screen featuring the full-scale Rise sunrise logo and tagline.
 public struct SplashLogo: View {
     public var isTaglineVisible: Bool
-    
+
     public init(isTaglineVisible: Bool = true) {
         self.isTaglineVisible = isTaglineVisible
     }
-    
+
     public var body: some View {
         VStack(spacing: RiseSpacing.xs) {
             Image("rise_sunrise_logo")
@@ -22,7 +22,7 @@ public struct SplashLogo: View {
                 .scaledToFit()
                 .frame(maxWidth: 210, maxHeight: 86)
                 .accessibilityLabel("Rise Logo")
-            
+
             Text("Your daily boost.")
                 .font(RiseTypography.titleSmall)
                 .fontWeight(.bold)

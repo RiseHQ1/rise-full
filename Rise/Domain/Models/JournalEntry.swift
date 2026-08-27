@@ -16,7 +16,7 @@ public struct JournalEntry: Identifiable, Hashable, Codable, Sendable {
     public var content: String
     public var mood: Mood?
     public var tags: [String]
-    
+
     public init(
         id: UUID = UUID(),
         createdAt: Date = Date(),

@@ -7,30 +7,29 @@
 
 import Foundation
 
-/// Default seed-based implementation of ContentRepositoryProtocol.
+/// Default catalog-backed implementation of ContentRepositoryProtocol.
 public final class DefaultContentRepository: ContentRepositoryProtocol, @unchecked Sendable {
-    private let seedMotivation = MotivationItem(
-        quote: "Your calm mind is the ultimate weapon against your challenges.",
-        author: "Marcus Aurelius",
-        category: .mindfulness
-    )
-    
-    private let seedAffirmations = [
-        Affirmation(text: "I am centered, focused, and ready for today.", category: .mindfulness),
-        Affirmation(text: "I embrace challenges with quiet confidence.", category: .resilience),
-        Affirmation(text: "Peace begins from within my own breath.", category: .clarity)
-    ]
-    
     public init() {}
-    
+
     public func fetchDailyMotivation() async throws -> MotivationItem {
-        return seedMotivation
+        let quotes = RiseMotivationCatalog.shared.items
+        let today = Date()
+        let dayOfYear = Calendar.current.ordinality(of: .day, in: .year, for: today) ?? 1
+        let index = (dayOfYear - 1) % max(quotes.count, 1)
+        let record = quotes[index]
+
+        return MotivationItem(
+            quote: record.quote,
+            author: record.author,
+            category: .mindfulness,
+            date: today
+        )
     }
-    
+
     public func fetchAffirmations(for focus: FocusArea?) async throws -> [Affirmation] {
-        if let focus {
-            return seedAffirmations.filter { $0.category == focus }
+        let items = RiseMotivationCatalog.shared.affirmations
+        return items.map { item in
+            Affirmation(text: item.text, category: focus ?? .mindfulness)
         }
-        return seedAffirmations
     }
 }

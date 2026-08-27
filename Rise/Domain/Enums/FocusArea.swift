@@ -15,9 +15,11 @@ public enum FocusArea: String, CaseIterable, Identifiable, Hashable, Codable, Se
     case sleep
     case productivity
     case gratitude
-    
-    public var id: String { rawValue }
-    
+
+    public var id: String {
+        rawValue
+    }
+
     public var displayName: String {
         switch self {
         case .mindfulness: return "Mindfulness"
@@ -28,7 +30,7 @@ public enum FocusArea: String, CaseIterable, Identifiable, Hashable, Codable, Se
         case .gratitude: return "Gratitude"
         }
     }
-    
+
     public var iconName: String {
         switch self {
         case .mindfulness: return "sparkles"

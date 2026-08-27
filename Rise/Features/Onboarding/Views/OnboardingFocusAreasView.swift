@@ -7,21 +7,20 @@
 
 import SwiftUI
 
-/// Onboarding Step 2: "What brings you here?" category selection screen.
-///
-/// Features a full-bleed hero artwork extending into the status bar, header text with balanced breathing room,
-/// 3x3 category grid, state validation (at least 1 selection required), inline validation error pill, and zero "I'll choose later" bypass.
+// Onboarding Step 2: "What brings you here?" category selection screen.
+
 public struct OnboardingFocusAreasView: View {
     @Environment(AppState.self) private var appState
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
-    
+
     public init() {}
-    
+
     public var body: some View {
         let onboardingState = appState.onboardingState
-        
+
         ZStack(alignment: .top) {
             // MARK: - 1. Upper Hero Background Image (Full-bleed into status bar)
+
             VStack(spacing: 0) {
                 GeometryReader { geo in
                     Image("onboarding_focus_bg")
@@ -31,10 +30,11 @@ public struct OnboardingFocusAreasView: View {
                         .clipped()
                         .overlay {
                             LinearGradient(
-                                colors: [
-                                    Color.clear,
-                                    Color(hex: "#070611").opacity(0.35),
-                                    RiseColors.backgroundPrimary
+                                stops: [
+                                    .init(color: .clear, location: 0.0),
+                                    .init(color: .clear, location: 0.55),
+                                    .init(color: Color(hex: "#070611").opacity(0.45), location: 0.82),
+                                    .init(color: RiseColors.backgroundPrimary, location: 1.0),
                                 ],
                                 startPoint: .top,
                                 endPoint: .bottom
@@ -42,29 +42,30 @@ public struct OnboardingFocusAreasView: View {
                         }
                 }
                 .frame(height: 310)
-                
+
                 Spacer()
             }
             .ignoresSafeArea(edges: .top)
             .allowsHitTesting(false)
-            
+
             // MARK: - 2. Content Layer
+
             ScrollView(.vertical, showsIndicators: false) {
                 VStack(alignment: .leading, spacing: 0) {
                     // Header Section (Positioned comfortably below high top bar)
                     GeometryReader { geo in
                         VStack(alignment: .leading, spacing: 3) {
                             Spacer()
-                            
+
                             Text("What brings")
-                                .font(.system(size: 26, weight: .bold, design: .rounded))
+                                .font(RiseTypography.heroCompact)
                                 .foregroundStyle(RiseColors.textPrimary)
                             Text("you here?")
-                                .font(.system(size: 26, weight: .bold, design: .rounded))
+                                .font(RiseTypography.heroCompact)
                                 .foregroundStyle(RiseColors.accentSecondary)
-                            
+
                             Text("Choose the areas you want Rise\nto help you with.")
-                                .font(.system(size: 13, weight: .regular))
+                                .font(RiseTypography.footnote)
                                 .foregroundStyle(RiseColors.textSecondary)
                                 .lineSpacing(2.5)
                                 .padding(.top, 2)
@@ -74,7 +75,7 @@ public struct OnboardingFocusAreasView: View {
                         .padding(.bottom, 14)
                     }
                     .frame(height: 250)
-                    
+
                     // Main Content Area
                     VStack(alignment: .leading, spacing: 12) {
                         // 3x3 Category Grid
@@ -82,7 +83,7 @@ public struct OnboardingFocusAreasView: View {
                             columns: [
                                 GridItem(.flexible(), spacing: 8),
                                 GridItem(.flexible(), spacing: 8),
-                                GridItem(.flexible(), spacing: 8)
+                                GridItem(.flexible(), spacing: 8),
                             ],
                             spacing: 8
                         ) {
@@ -104,77 +105,46 @@ public struct OnboardingFocusAreasView: View {
                                 }
                             }
                         }
-                        
+
                         // Inline Validation Warning Banner (Subtle & Polished)
                         if let errorMessage = onboardingState.validationErrorMessage {
                             HStack(spacing: 6) {
                                 Image(systemName: "exclamationmark.triangle.fill")
-                                    .font(.system(size: 12, weight: .semibold))
-                                    .foregroundStyle(Color(hex: "#F59E0B"))
+                                    .font(RiseTypography.captionSemibold)
+                                    .foregroundStyle(RiseColors.accentSecondary)
                                 Text(errorMessage)
-                                    .font(.system(size: 12.5, weight: .medium, design: .rounded))
-                                    .foregroundStyle(Color(hex: "#F59E0B"))
+                                    .font(RiseTypography.caption)
+                                    .foregroundStyle(RiseColors.accentSecondary)
                             }
                             .padding(.horizontal, 14)
                             .padding(.vertical, 8)
                             .frame(maxWidth: .infinity, alignment: .leading)
-                            .background(Color(hex: "#F59E0B").opacity(0.12))
+                            .background(RiseColors.accentSecondary.opacity(0.12))
                             .overlay(
                                 RoundedRectangle(cornerRadius: 10, style: .continuous)
-                                    .stroke(Color(hex: "#F59E0B").opacity(0.35), lineWidth: 1)
+                                    .stroke(RiseColors.accentSecondary.opacity(0.35), lineWidth: 1)
                             )
                             .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
                             .padding(.top, 2)
                         }
-                        
+
                         // Primary CTA Button ("Continue ->") - Triggers Validation
-                        Button(action: {
-                            let impact = UIImpactFeedbackGenerator(style: .medium)
-                            impact.impactOccurred()
+                        RisePrimaryButton("Continue", iconName: "arrow.right", style: .gold) {
                             withAnimation(reduceMotion ? nil : .spring(response: 0.35, dampingFraction: 0.85)) {
                                 onboardingState.advanceFromStep1()
                             }
-                        }) {
-                            ZStack {
-                                Text("Continue")
-                                    .font(.system(size: 17, weight: .bold, design: .rounded))
-                                    .foregroundStyle(Color(hex: "#090616"))
-                                
-                                HStack {
-                                    Spacer()
-                                    Image(systemName: "arrow.right")
-                                        .font(.system(size: 16, weight: .bold))
-                                        .foregroundStyle(Color(hex: "#090616"))
-                                        .padding(.trailing, 20)
-                                }
-                            }
-                            .frame(maxWidth: .infinity)
-                            .frame(height: 50)
-                            .background(
-                                LinearGradient(
-                                    colors: [
-                                        Color(hex: "#FFD868"),
-                                        Color(hex: "#F59E0B")
-                                    ],
-                                    startPoint: .topLeading,
-                                    endPoint: .bottomTrailing
-                                )
-                            )
-                            .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
-                            .opacity(onboardingState.selectedCategories.isEmpty ? 0.60 : 1.0)
-                            .riseShadow(RiseShadows.goldGlow)
                         }
-                        .buttonStyle(RisePressableButtonStyle(reduceMotion: reduceMotion))
+                        .disabled(onboardingState.selectedCategories.isEmpty)
                         .padding(.top, 4)
-                        
+
                         // Footer Lock Note
                         HStack(spacing: 5) {
                             Spacer()
                             Image(systemName: "lock.fill")
-                                .font(.system(size: 10, weight: .semibold))
+                                .font(RiseTypography.microSemibold)
                                 .foregroundStyle(RiseColors.textMuted)
                             Text("You can change this anytime in settings.")
-                                .font(.system(size: 11.5, weight: .regular))
+                                .font(RiseTypography.micro)
                                 .foregroundStyle(RiseColors.textMuted)
                             Spacer()
                         }
@@ -190,6 +160,7 @@ public struct OnboardingFocusAreasView: View {
 }
 
 // MARK: - Domain Category Definition
+
 public enum OnboardingCategory: String, CaseIterable, Identifiable {
     case motivation
     case discipline
@@ -200,9 +171,11 @@ public enum OnboardingCategory: String, CaseIterable, Identifiable {
     case money
     case personalGrowth
     case stressRelief
-    
-    public var id: String { rawValue }
-    
+
+    public var id: String {
+        rawValue
+    }
+
     public var title: String {
         switch self {
         case .motivation: return "Motivation"
@@ -216,7 +189,7 @@ public enum OnboardingCategory: String, CaseIterable, Identifiable {
         case .stressRelief: return "Stress Relief"
         }
     }
-    
+
     public var description: String {
         switch self {
         case .motivation: return "Stay inspired and\nkeep moving\nforward."
@@ -230,7 +203,7 @@ public enum OnboardingCategory: String, CaseIterable, Identifiable {
         case .stressRelief: return "Find peace and\nreduce stress in\nyour daily life."
         }
     }
-    
+
     public var iconName: String {
         switch self {
         case .motivation: return "onboarding_icon_motivation"
@@ -247,11 +220,12 @@ public enum OnboardingCategory: String, CaseIterable, Identifiable {
 }
 
 // MARK: - Category Grid Card View Component
+
 private struct CategoryCard: View {
     let category: OnboardingCategory
     let isSelected: Bool
     let action: () -> Void
-    
+
     var body: some View {
         Button(action: action) {
             VStack(alignment: .leading, spacing: 4) {
@@ -262,19 +236,19 @@ private struct CategoryCard: View {
                         .scaledToFit()
                         .frame(width: 44, height: 44)
                         .accessibilityHidden(true)
-                    
+
                     Spacer(minLength: 0)
-                    
+
                     // Selection Badge Circle
                     ZStack {
                         if isSelected {
                             Circle()
                                 .fill(RiseColors.accentSecondary)
                                 .frame(width: 18, height: 18)
-                            
+
                             Image(systemName: "checkmark")
-                                .font(.system(size: 10, weight: .bold))
-                                .foregroundStyle(Color(hex: "#090616"))
+                                .font(RiseTypography.microBold)
+                                .foregroundStyle(RiseColors.textOnGold)
                         } else {
                             Circle()
                                 .stroke(Color.white.opacity(0.25), lineWidth: 1.2)
@@ -282,71 +256,24 @@ private struct CategoryCard: View {
                         }
                     }
                 }
-                
+
                 // Title
                 Text(category.title)
-                    .font(.system(size: 12.5, weight: .bold, design: .rounded))
+                    .font(RiseTypography.captionBold)
                     .foregroundStyle(RiseColors.textPrimary)
                     .lineLimit(1)
                     .padding(.top, 2)
-                
+
                 // Description
                 Text(category.description)
-                    .font(.system(size: 9.5, weight: .regular))
+                    .font(RiseTypography.micro)
                     .foregroundStyle(RiseColors.textSecondary)
                     .lineSpacing(1.8)
                     .fixedSize(horizontal: false, vertical: true)
             }
             .padding(8)
             .frame(maxWidth: .infinity, minHeight: 124, alignment: .topLeading)
-            .background {
-                ZStack {
-                    // Dark Translucent Glass Surface
-                    RoundedRectangle(cornerRadius: 16, style: .continuous)
-                        .fill(Color(hex: "#100C24").opacity(0.82))
-                    
-                    RoundedRectangle(cornerRadius: 16, style: .continuous)
-                        .fill(.ultraThinMaterial)
-                        .opacity(0.35)
-                    
-                    if isSelected {
-                        // Subtle Purple Illumination Tint
-                        RoundedRectangle(cornerRadius: 16, style: .continuous)
-                            .fill(RiseColors.accentPrimary.opacity(0.22))
-                    }
-                }
-            }
-            .overlay {
-                ZStack {
-                    // Outer Border
-                    RoundedRectangle(cornerRadius: 16, style: .continuous)
-                        .stroke(
-                            isSelected
-                                ? RiseColors.accentPrimary
-                                : RiseColors.borderSubtle.opacity(0.6),
-                            lineWidth: isSelected ? 1.5 : 1.0
-                        )
-                    
-                    if isSelected {
-                        // Top-Left Specular Shine Streak Highlight
-                        RoundedRectangle(cornerRadius: 16, style: .continuous)
-                            .stroke(
-                                LinearGradient(
-                                    colors: [
-                                        Color.white.opacity(0.85),
-                                        RiseColors.accentPrimary.opacity(0.60),
-                                        Color.clear
-                                    ],
-                                    startPoint: .topLeading,
-                                    endPoint: .bottomTrailing
-                                ),
-                                lineWidth: 1.2
-                            )
-                    }
-                }
-            }
-            .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
-            .riseShadow(isSelected ? RiseShadows.accentGlow : RiseShadows.elevationLow)
+            .riseCategoryGlass(cornerRadius: 16, isSelected: isSelected)
         }
         .buttonStyle(RisePressableButtonStyle())
         .accessibilityLabel("\(category.title), \(isSelected ? "selected" : "not selected")")

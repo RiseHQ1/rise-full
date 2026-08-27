@@ -11,15 +11,15 @@ import SwiftUI
 public struct RiseLoadingRing: View {
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @State private var isRotating: Bool = false
-    
+
     public var size: CGFloat
     public var lineWidth: CGFloat
-    
+
     public init(size: CGFloat = 26, lineWidth: CGFloat = 2.5) {
         self.size = size
         self.lineWidth = lineWidth
     }
-    
+
     public var body: some View {
         Circle()
             .trim(from: 0.08, to: 0.88)
@@ -29,9 +29,9 @@ public struct RiseLoadingRing: View {
                         Color(hex: "#8B5CF6"), // Rise Purple
                         Color(hex: "#C084FC"), // Lavender Accent
                         Color(hex: "#EC4899"), // Rose / Pink Accent
-                        Color(hex: "#F59E0B"), // Warm Amber
+                        RiseColors.accentSecondary, // Warm Amber
                         Color(hex: "#FBBF24"), // Gold Highlight
-                        Color(hex: "#8B5CF6")  // Loop back to Purple
+                        Color(hex: "#8B5CF6"), // Loop back to Purple
                     ]),
                     center: .center
                 ),

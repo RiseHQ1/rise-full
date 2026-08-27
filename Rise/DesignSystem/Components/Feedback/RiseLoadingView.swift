@@ -10,17 +10,17 @@ import SwiftUI
 /// Calm, minimal loading indicator using Rise accent colors and typography.
 public struct RiseLoadingView: View {
     public let message: String?
-    
+
     public init(_ message: String? = "Finding calm...") {
         self.message = message
     }
-    
+
     public var body: some View {
         VStack(spacing: RiseSpacing.md) {
             ProgressView()
                 .scaleEffect(1.2)
                 .tint(RiseColors.accentPrimary)
-            
+
             if let message {
                 Text(message)
                     .font(RiseTypography.body)

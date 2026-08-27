@@ -12,15 +12,15 @@ import SwiftUI
 public struct RiseTextField: View {
     let placeholder: String
     @Binding var text: String
-    var iconName: String? = nil
+    var iconName: String?
     var isSecure: Bool = false
     var keyboardType: UIKeyboardType = .default
     var textInputAutocapitalization: TextInputAutocapitalization = .never
-    var onChange: (() -> Void)? = nil
-    
+    var onChange: (() -> Void)?
+
     @FocusState private var isFocused: Bool
     @State private var isPasswordVisible: Bool = false
-    
+
     public init(
         placeholder: String,
         text: Binding<String>,
@@ -31,27 +31,27 @@ public struct RiseTextField: View {
         onChange: (() -> Void)? = nil
     ) {
         self.placeholder = placeholder
-        self._text = text
+        _text = text
         self.iconName = iconName
         self.isSecure = isSecure
         self.keyboardType = keyboardType
         self.textInputAutocapitalization = textInputAutocapitalization
         self.onChange = onChange
     }
-    
+
     public var body: some View {
         HStack(spacing: 10) {
             if let iconName {
                 Image(systemName: iconName)
-                    .font(.system(size: 15, weight: .semibold))
-                    .foregroundStyle(isFocused ? Color(hex: "#F59E0B") : RiseColors.textSecondary)
+                    .font(RiseTypography.subheadlineSemibold)
+                    .foregroundStyle(isFocused ? RiseColors.accentSecondary : RiseColors.textSecondary)
             }
-            
+
             if isSecure && !isPasswordVisible {
                 SecureField("", text: $text, prompt: Text(placeholder).foregroundColor(RiseColors.textMuted))
-                    .font(.system(size: 14, weight: .medium))
+                    .font(RiseTypography.subheadline)
                     .foregroundStyle(.white)
-                    .tint(Color(hex: "#F59E0B"))
+                    .tint(RiseColors.accentSecondary)
                     .preferredColorScheme(.dark)
                     .focused($isFocused)
                     .keyboardType(keyboardType)
@@ -62,9 +62,9 @@ public struct RiseTextField: View {
                     }
             } else {
                 TextField("", text: $text, prompt: Text(placeholder).foregroundColor(RiseColors.textMuted))
-                    .font(.system(size: 14, weight: .medium))
+                    .font(RiseTypography.subheadline)
                     .foregroundStyle(.white)
-                    .tint(Color(hex: "#F59E0B"))
+                    .tint(RiseColors.accentSecondary)
                     .preferredColorScheme(.dark)
                     .focused($isFocused)
                     .keyboardType(keyboardType)
@@ -74,13 +74,13 @@ public struct RiseTextField: View {
                         onChange?()
                     }
             }
-            
+
             if isSecure {
                 Button(action: {
                     isPasswordVisible.toggle()
                 }) {
                     Image(systemName: isPasswordVisible ? "eye.slash" : "eye")
-                        .font(.system(size: 14, weight: .semibold))
+                        .font(RiseTypography.calloutSemibold)
                         .foregroundStyle(RiseColors.textSecondary)
                 }
             }
@@ -88,15 +88,15 @@ public struct RiseTextField: View {
         .padding(.horizontal, 14)
         .frame(height: 46)
         .background(
-            RoundedRectangle(cornerRadius: 14, style: .continuous)
-                .fill(Color(hex: "#100C24").opacity(0.82))
+            RoundedRectangle(cornerRadius: RiseRadius.control, style: .continuous)
+                .fill(RiseColors.surfaceField.opacity(0.82))
         )
         .overlay {
-            RoundedRectangle(cornerRadius: 14, style: .continuous)
+            RoundedRectangle(cornerRadius: RiseRadius.control, style: .continuous)
                 .stroke(
                     isFocused
-                        ? Color(hex: "#F59E0B")
-                        : RiseColors.borderSubtle.opacity(0.6),
+                        ? RiseColors.accentSecondary
+                        : RiseColors.borderHairline,
                     lineWidth: isFocused ? 1.5 : 1.0
                 )
         }
@@ -107,14 +107,14 @@ public struct RiseTextField: View {
     ZStack {
         RiseColors.backgroundPrimary
             .ignoresSafeArea()
-        
+
         VStack(spacing: 16) {
             RiseTextField(
                 placeholder: "Full name",
                 text: .constant("Kwame"),
                 iconName: "person"
             )
-            
+
             RiseTextField(
                 placeholder: "Create password",
                 text: .constant("Secret123!"),

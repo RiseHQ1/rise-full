@@ -15,7 +15,7 @@ public struct RiseFeaturedCard<Content: View>: View {
     public var padding: CGFloat
     public var isGoldAccent: Bool
     public let content: () -> Content
-    
+
     public init(
         cornerRadius: CGFloat = RiseRadius.extraLarge,
         padding: CGFloat = RiseSpacing.lg,
@@ -27,7 +27,7 @@ public struct RiseFeaturedCard<Content: View>: View {
         self.isGoldAccent = isGoldAccent
         self.content = content
     }
-    
+
     public var body: some View {
         content()
             .padding(padding)
@@ -35,7 +35,7 @@ public struct RiseFeaturedCard<Content: View>: View {
             .background {
                 ZStack {
                     RiseColors.riseCardGradient
-                    
+
                     if isGoldAccent {
                         RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
                             .stroke(RiseColors.accentSecondary.opacity(0.4), lineWidth: 1.5)
@@ -69,13 +69,13 @@ public struct RiseFeaturedCard<Content: View>: View {
                     Image(systemName: "sparkles")
                         .foregroundStyle(RiseColors.accentPrimary)
                 }
-                
+
                 Text("“I meet today's moments with quiet strength and boundless clarity.”")
                     .font(RiseTypography.quote)
                     .foregroundStyle(RiseColors.textPrimary)
             }
         }
-        
+
         RiseFeaturedCard(isGoldAccent: true) {
             VStack(alignment: .leading, spacing: RiseSpacing.sm) {
                 HStack {
@@ -86,7 +86,7 @@ public struct RiseFeaturedCard<Content: View>: View {
                     Image(systemName: "sun.max.fill")
                         .foregroundStyle(RiseColors.accentSecondary)
                 }
-                
+
                 Text("You have unlocked consistent morning presence.")
                     .font(RiseTypography.headline)
                     .foregroundStyle(RiseColors.textPrimary)
