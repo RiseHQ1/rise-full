@@ -84,6 +84,15 @@ export class AuthService {
 
     const tokens = await this.generateTokens(user.id, user.subscriptionTier, ipAddress, userAgent);
 
+    // Automatically trigger OTP generation and dispatch via Brevo
+    try {
+      if (user.email) {
+        await this.generateAndSendOTP(user.email, user.name);
+      }
+    } catch (otpErr) {
+      logger.warn({ otpErr }, 'Failed to dispatch initial registration OTP');
+    }
+
     return {
       user: this.sanitizeUser(user),
       tokens,

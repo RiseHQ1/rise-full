@@ -263,13 +263,18 @@ public final class OnboardingState {
         userName = trimmedName
 
         isAuthenticating = true
-        Task {
+        Task { @MainActor in
             do {
+                struct RegisterPayload: Encodable {
+                    let email: String
+                    let password: String
+                    let name: String
+                }
                 struct AuthResponse: Decodable {
                     let user: UserDTO
                     let tokens: AuthTokensDTO
                 }
-                let payload = ["email": emailInput, "password": passwordInput, "name": trimmedName]
+                let payload = RegisterPayload(email: emailInput, password: passwordInput, name: trimmedName)
                 let result: AuthResponse = try await RiseAPIClient.shared.request(
                     endpoint: "auth/register",
                     method: "POST",
@@ -284,8 +289,26 @@ public final class OnboardingState {
                 currentStepIndex = OnboardingStep.emailVerification.rawValue
             } catch {
                 isAuthenticating = false
-                // If account exists or testing offline, transition to verification smoothly
-                RiseLogger.warning("Registration fallback to OTP verification: \(error.localizedDescription)")
+                RiseLogger.error("Registration error: \(error)")
+                // Try sending OTP code explicitly as backup
+                do {
+                    struct SendOtpPayload: Encodable {
+                        let email: String
+                        let name: String
+                    }
+                    let otpPayload = SendOtpPayload(email: emailInput, name: trimmedName)
+                    struct SendOtpResponse: Decodable {
+                        let success: Bool
+                    }
+                    let _: SendOtpResponse = try await RiseAPIClient.shared.request(
+                        endpoint: "auth/send-otp",
+                        method: "POST",
+                        body: otpPayload,
+                        requiresAuth: false
+                    )
+                } catch {
+                    RiseLogger.warning("OTP dispatch backup notice: \(error.localizedDescription)")
+                }
                 currentStepIndex = OnboardingStep.emailVerification.rawValue
             }
         }
