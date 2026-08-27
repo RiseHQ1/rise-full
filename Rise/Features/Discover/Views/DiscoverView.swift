@@ -282,9 +282,10 @@ public struct DiscoverView: View {
                 .padding(12)
             }
             .frame(width: 138, height: 196)
-            .riseCardStroke(cornerRadius: RiseRadius.cardLarge)
-            .riseShadow(RiseShadows.elevationLow)
-        }
+        .buttonStyle(RisePressableButtonStyle())
+        .accessibilityLabel("\(category.title), \(category.count) items")
+    }
+
     private var risePacksSection: some View {
         VStack(alignment: .leading, spacing: RiseSpacing.sm) {
             RiseInlineSectionHeader(title: "7-Day Rise Packs") {

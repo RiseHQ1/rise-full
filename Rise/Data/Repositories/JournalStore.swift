@@ -93,28 +93,41 @@ public final class JournalStore {
         entries = [
             JournalEntryItem(
                 title: "Grateful for the little wins today.",
-                content: "Finished my morning routine without looking at notifications first thing. Sat at the balcony with my tea and wrote down my focus priorities. It wasn't a perfect day, but I showed up with intention and stayed grounded even when work got busy.",
+                content: """
+                Finished my morning routine without looking at notifications first thing. \
+                Sat at the balcony with my tea and wrote down my focus priorities. \
+                It wasn't a perfect day, but I showed up with intention and stayed grounded.
+                """,
                 mood: "Good",
                 assetName: "onboarding_motivation_bg",
                 date: Calendar.current.date(byAdding: .hour, value: -6, to: Date()) ?? Date()
             ),
             JournalEntryItem(
                 title: "Slowing down helped me reset.",
-                content: "Took a walk in the afternoon and let my mind wander without pressure. When I feel overwhelmed, taking two minutes of box breathing makes all the difference in regaining calm.",
+                content: """
+                Took a walk in the afternoon and let my mind wander without pressure. \
+                When I feel overwhelmed, taking two minutes of box breathing makes all the difference.
+                """,
                 mood: "Calm",
                 assetName: "onboarding_focus_bg",
                 date: Calendar.current.date(byAdding: .day, value: -1, to: Date()) ?? Date()
             ),
             JournalEntryItem(
                 title: "A reminder to keep going.",
-                content: "Consistency is not about perfection; it's about returning to what matters after getting off track. Ready for the week ahead with a clear mind.",
+                content: """
+                Consistency is not about perfection; it's about returning to what matters after getting off track. \
+                Ready for the week ahead with a clear mind.
+                """,
                 mood: "Okay",
                 assetName: "onboarding_summary_bg",
                 date: Calendar.current.date(byAdding: .day, value: -2, to: Date()) ?? Date()
             ),
             JournalEntryItem(
                 title: "Finding focus in the quiet mornings.",
-                content: "Waking up early gives me space to think before the world asks for my attention. Setting one clear daily intention keeps me anchored.",
+                content: """
+                Waking up early gives me space to think before the world asks for my attention. \
+                Setting one clear daily intention keeps me anchored.
+                """,
                 mood: "Good",
                 assetName: "splash_sunrise_scene",
                 date: Calendar.current.date(byAdding: .day, value: -3, to: Date()) ?? Date()

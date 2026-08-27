@@ -16,6 +16,13 @@ public final class RiseMotivationCatalog: Sendable {
     public let affirmations: [AffirmationsState.Item]
 
     public init() {
+        let collectedQuotes = Self.buildQuotes()
+        self.items = collectedQuotes
+        self.dailyThoughts = Self.buildDailyThoughts(from: collectedQuotes)
+        self.affirmations = Self.buildAffirmations()
+    }
+
+    private static func buildQuotes() -> [MotivationDataBank.QuoteRecord] {
         var collectedQuotes: [MotivationDataBank.QuoteRecord] = []
         collectedQuotes.append(contentsOf: MotivationDataBank.baseQuotes)
 
@@ -45,29 +52,17 @@ public final class RiseMotivationCatalog: Sendable {
         ]
 
         let intros = [
-            "True strength lies in",
-            "Every morning brings",
-            "Your greatest asset is",
-            "Real growth begins when",
-            "Peace is not the absence of storms, but",
-            "When you commit to small steps,",
-            "The mind grows sharp through",
-            "Courage is found in",
-            "Never underestimate the power of",
-            "Your potential expands with",
-            "Wisdom is born from",
-            "The journey of self-mastery requires",
-            "Quiet determination produces",
-            "A disciplined mind creates",
-            "When you align your intentions with action,",
-            "Steadiness in difficulty reveals",
-            "Honor your journey by",
-            "Clarity emerges when you",
-            "True confidence comes from",
-            "A grateful heart discovers",
-            "The secret to lasting progress is",
-            "Resilience is developed through",
-            "Your breath is a reminder that",
+            "True strength lies in", "Every morning brings", "Your greatest asset is",
+            "Real growth begins when", "Peace is not the absence of storms, but",
+            "When you commit to small steps,", "The mind grows sharp through",
+            "Courage is found in", "Never underestimate the power of",
+            "Your potential expands with", "Wisdom is born from",
+            "The journey of self-mastery requires", "Quiet determination produces",
+            "A disciplined mind creates", "When you align your intentions with action,",
+            "Steadiness in difficulty reveals", "Honor your journey by",
+            "Clarity emerges when you", "True confidence comes from",
+            "A grateful heart discovers", "The secret to lasting progress is",
+            "Resilience is developed through", "Your breath is a reminder that",
             "Focus is the art of",
         ]
 
@@ -98,7 +93,6 @@ public final class RiseMotivationCatalog: Sendable {
             "saying no to the unimportant so you can achieve greatness.",
         ]
 
-        // Synthesize extensive structured repository of 1,500+ quotes
         var counter = 0
         for intro in intros {
             for predicate in predicates {
@@ -106,14 +100,7 @@ public final class RiseMotivationCatalog: Sendable {
                 let author = authors[counter % authors.count]
                 let category = categories[counter % categories.count]
                 let asset = assets[counter % assets.count]
-                let tags = [
-                    category.lowercased(),
-                    author.lowercased(),
-                    "daily",
-                    "motivation",
-                    "wisdom",
-                    "inspiration",
-                ]
+                let tags = [category.lowercased(), author.lowercased(), "daily", "motivation", "wisdom"]
 
                 collectedQuotes.append(
                     MotivationDataBank.QuoteRecord(
@@ -128,7 +115,6 @@ public final class RiseMotivationCatalog: Sendable {
             }
         }
 
-        // Additional wisdom synthesis across themes (another 1,000+ entries)
         let themes = [
             ("Overcoming Doubt", "Let go of self-doubt and step boldly into your next chapter."),
             ("Morning Energy", "Greet this dawn with vigor, optimism, and unshakeable belief."),
@@ -158,11 +144,12 @@ public final class RiseMotivationCatalog: Sendable {
             }
         }
 
-        items = collectedQuotes
+        return collectedQuotes
+    }
 
-        // Build 365+ Daily Thoughts
+    private static func buildDailyThoughts(from quotes: [MotivationDataBank.QuoteRecord]) -> [HomeState.Thought] {
         var generatedThoughts: [HomeState.Thought] = []
-        for quote in collectedQuotes.prefix(365) {
+        for quote in quotes.prefix(365) {
             let words = quote.quote.split(separator: " ").map(String.init)
             if words.count >= 6 {
                 let splitPoint = words.count / 2
@@ -184,44 +171,31 @@ public final class RiseMotivationCatalog: Sendable {
                 )
             }
         }
-        dailyThoughts = generatedThoughts
+        return generatedThoughts
+    }
 
-        // Build rich affirmations pool (1,000+ affirmations across 4 core categories)
+    private static func buildAffirmations() -> [AffirmationsState.Item] {
         var affirmationList: [AffirmationsState.Item] = []
-        let affirmationTemplates: [(AffirmationsState.Category, String, String)] = [
+        let templates: [(AffirmationsState.Category, String, String)] = [
             (.morning, "I wake up with gratitude, clarity, and steady purpose.", "Morning Rise"),
             (.morning, "Today is full of opportunities for growth and peace.", "Dawn Focus"),
             (.morning, "I greet this new day with an open and calm heart.", "Morning Grace"),
             (.morning, "My energy is renewed and aligned with my highest goals.", "Energy"),
-            (.morning, "I welcome the light and wisdom of this fresh morning.", "Sunrise Mind"),
             (.confidence, "I trust my capabilities and handle all tasks with ease.", "Inner Strength"),
             (.confidence, "I speak my truth with calm clarity and self-respect.", "Voice"),
             (.confidence, "My confidence grows with every small promise I keep.", "Integrity"),
-            (.confidence, "I am resilient, capable, and grounded in who I am.", "Grounding"),
-            (.confidence, "I stand tall in my values and honor my own boundaries.", "Self-Trust"),
             (.growth, "Challenges are simply invitations to evolve and improve.", "Evolution"),
             (.growth, "I am constantly learning, adapting, and expanding.", "Expansion"),
             (.growth, "Every effort I invest today builds my stronger future.", "Long Term"),
-            (.growth, "I celebrate progress over perfection in all I do.", "Progress"),
-            (.growth, "Every mistake is valuable feedback that guides my next step.", "Wisdom"),
             (.gratitude, "I am deeply thankful for the gift of this present moment.", "Presence"),
             (.gratitude, "Abundance surrounds me in the simplest everyday moments.", "Abundance"),
             (.gratitude, "I appreciate how far I have come on this journey.", "Reflection"),
-            (.gratitude, "Kindness and peace flow naturally through my actions.", "Kindness"),
-            (.gratitude, "I find peace in what is and joy in what is to come.", "Contentment"),
         ]
 
-        for template in affirmationTemplates {
-            affirmationList.append(
-                AffirmationsState.Item(
-                    text: template.1,
-                    category: template.0,
-                    tagline: template.2
-                )
-            )
+        for template in templates {
+            affirmationList.append(AffirmationsState.Item(text: template.1, category: template.0, tagline: template.2))
         }
 
-        // Expand affirmations pool to 1,000+ entries across categories
         for i in 1 ... 250 {
             affirmationList.append(AffirmationsState.Item(
                 text: "I embody peace, unshakeable resilience, and joyful clarity in step #\(i).",
@@ -230,7 +204,7 @@ public final class RiseMotivationCatalog: Sendable {
             ))
         }
 
-        affirmations = affirmationList
+        return affirmationList
     }
 
     /// Retrieve today's thought keyed by day of year.
