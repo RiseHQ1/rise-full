@@ -432,17 +432,22 @@ public final class OnboardingState {
         Task {
             guard RiseAPIClient.shared.isAuthenticated else { return }
             do {
-                let focusAreasArray = selectedCategories.map { $0.rawValue }
-                let body = [
-                    "focusAreas": focusAreasArray,
-                    "motivationStyle": selectedMotivationStyle?.title ?? "GENTLE",
-                    "morningBoostTime": "07:00",
-                    "eveningReflectionTime": "21:00"
-                ] as [String : Any]
+                struct SyncProfilePayload: Encodable {
+                    let focusAreas: [String]
+                    let motivationStyle: String
+                    let morningBoostTime: String
+                    let eveningReflectionTime: String
+                }
+                let payload = SyncProfilePayload(
+                    focusAreas: selectedCategories.map { $0.rawValue },
+                    motivationStyle: selectedMotivationStyle?.title ?? "GENTLE",
+                    morningBoostTime: "07:00",
+                    eveningReflectionTime: "21:00"
+                )
                 let _: UserDTO = try await RiseAPIClient.shared.request(
                     endpoint: "user/profile",
                     method: "PUT",
-                    body: body
+                    body: payload
                 )
                 RiseLogger.info("Onboarding profile successfully synchronized to server.")
             } catch {

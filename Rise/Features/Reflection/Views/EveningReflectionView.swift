@@ -112,11 +112,16 @@ public struct EveningReflectionView: View {
         // Asynchronously query Google Gemini for Stoic AI reflection insights
         Task {
             do {
-                let payload: [String: Any] = [
-                    "mood": mood.uppercased(),
-                    "category": "Reflection",
-                    "entryText": fullContent
-                ]
+                struct ReflectionRequestPayload: Encodable {
+                    let mood: String
+                    let category: String
+                    let entryText: String
+                }
+                let payload = ReflectionRequestPayload(
+                    mood: mood.uppercased(),
+                    category: "Reflection",
+                    entryText: fullContent
+                )
                 let aiResponse: AIReflectionResponseDTO = try await RiseAPIClient.shared.request(
                     endpoint: "ai/reflection",
                     method: "POST",
