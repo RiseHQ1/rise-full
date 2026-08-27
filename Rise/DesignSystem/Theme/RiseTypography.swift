@@ -149,10 +149,16 @@ public enum RiseTypography {
     /// Tiny symbol for metadata rows (scales with caption).
     public static let symbolMicro = Font.system(.caption, weight: .semibold)
 
-    // MARK: - Compatibility Aliases
-
     public static var titleLarge: Font {
         hero
+    }
+
+    public static var title1Bold: Font {
+        hero
+    }
+
+    public static var largeTitleBold: Font {
+        display
     }
 
     public static var titleMedium: Font {
@@ -161,6 +167,10 @@ public enum RiseTypography {
 
     public static var bodyLarge: Font {
         body
+    }
+
+    public static var bodyBold: Font {
+        bodyEmphasized
     }
 
     public static var bodyMedium: Font {
