@@ -168,6 +168,55 @@ public final class UserProfileStore {
         UserDefaults.standard.set(action, forKey: "today_intention_action")
         UserDefaults.standard.set(why, forKey: "today_intention_why")
         UserDefaults.standard.set(true, forKey: "today_intention_completed")
+
+        // Sync Intention to live PostgreSQL Database
+        Task {
+            guard RiseAPIClient.shared.isAuthenticated else { return }
+            do {
+                let formatter = DateFormatter()
+                formatter.dateFormat = "yyyy-MM-dd"
+                let dateString = formatter.string(from: Date())
+
+                let isoFormatter = ISO8601DateFormatter()
+                isoFormatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
+                let nowIso = isoFormatter.string(from: Date())
+
+                struct CreateIntentionPayload: Encodable {
+                    let syncId: String
+                    let date: String
+                    let text: String
+                    let category: String
+                    let isCustom: Bool
+                    let isCompleted: Bool
+                    let clientCreatedAt: String
+                    let clientUpdatedAt: String
+                }
+
+                let payload = CreateIntentionPayload(
+                    syncId: UUID().uuidString,
+                    date: dateString,
+                    text: text,
+                    category: focus,
+                    isCustom: true,
+                    isCompleted: false,
+                    clientCreatedAt: nowIso,
+                    clientUpdatedAt: nowIso
+                )
+
+                struct IntentionResponse: Decodable {
+                    let id: String
+                }
+
+                let _: IntentionResponse = try await RiseAPIClient.shared.request(
+                    endpoint: "intentions",
+                    method: "POST",
+                    body: payload
+                )
+                RiseLogger.info("Daily intention successfully saved to PostgreSQL database.")
+            } catch {
+                RiseLogger.warning("Intention server sync notice: \(error.localizedDescription)")
+            }
+        }
     }
 
     public func clearDailyIntention() {

@@ -105,8 +105,12 @@ public final class SavedContentStore {
         category: String = "Motivation",
         assetName: String = "onboarding_motivation_bg"
     ) {
+        let isNowSaved: Bool
+        let syncId: UUID
         if let index = items.firstIndex(where: { $0.title.lowercased() == title.lowercased() }) {
+            syncId = items[index].id
             items.remove(at: index)
+            isNowSaved = false
         } else {
             let newItem = SavedItem(
                 title: title,
@@ -114,9 +118,64 @@ public final class SavedContentStore {
                 category: category,
                 assetName: assetName
             )
+            syncId = newItem.id
             items.insert(newItem, at: 0)
+            isNowSaved = true
         }
         persist()
+
+        // Sync Favorite to live PostgreSQL Database via Delta Sync
+        Task {
+            guard RiseAPIClient.shared.isAuthenticated else { return }
+            do {
+                let isoFormatter = ISO8601DateFormatter()
+                isoFormatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
+                let nowIso = isoFormatter.string(from: Date())
+
+                struct SyncSavedItemPayload: Encodable {
+                    let syncId: String
+                    let title: String
+                    let subtitle: String?
+                    let category: String
+                    let assetName: String
+                    let isFavorite: Bool
+                    let clientUpdatedAt: String
+                    let isDeleted: Bool
+                    let version: Int
+                }
+
+                struct DeltaSyncPayload: Encodable {
+                    let savedItems: [SyncSavedItemPayload]
+                }
+
+                let savedPayload = SyncSavedItemPayload(
+                    syncId: syncId.uuidString,
+                    title: title,
+                    subtitle: subtitle.isEmpty ? nil : subtitle,
+                    category: category,
+                    assetName: assetName,
+                    isFavorite: isNowSaved,
+                    clientUpdatedAt: nowIso,
+                    isDeleted: !isNowSaved,
+                    version: 1
+                )
+
+                let deltaPayload = DeltaSyncPayload(savedItems: [savedPayload])
+
+                struct DeltaSyncResponse: Decodable {
+                    let serverTimestamp: String
+                }
+
+                let _: DeltaSyncResponse = try await RiseAPIClient.shared.request(
+                    endpoint: "sync/delta",
+                    method: "POST",
+                    body: deltaPayload
+                )
+                RiseLogger.info("Favorite successfully synchronized to PostgreSQL saved_contents table.")
+            } catch {
+                RiseLogger.warning("Favorite sync notice: \(error.localizedDescription)")
+            }
+        }
     }
 
     public func save(item: SavedItem) {
