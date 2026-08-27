@@ -3,7 +3,7 @@
 //  Rise
 //
 //  Official Rise+ Premium Subscription Paywall Modal View
-//  Follows Blueprint Section 6 & 18 (Liquid Glass, 3-Tier Pricing, StoreKit 2)
+//  Combines the approved Sunrise Hero visual design with Rise's authentic product features
 //
 
 import SwiftUI
@@ -12,46 +12,43 @@ public struct RisePaywallView: View {
     @Environment(\.dismiss) private var dismiss
 
     public enum PlanTier: String, CaseIterable, Identifiable {
-        case annual
         case monthly
-        case lifetime
+        case yearly
 
-        public var id: String { rawValue }
+        public var id: String {
+            rawValue
+        }
 
         public var title: String {
             switch self {
-            case .annual: return "Annual Plan"
             case .monthly: return "Monthly Plan"
-            case .lifetime: return "Lifetime Access"
+            case .yearly: return "Annual Plan"
             }
         }
 
-        public var price: String {
+        public var priceString: String {
             switch self {
-            case .annual: return "$29.99 / year"
             case .monthly: return "$4.99 / month"
-            case .lifetime: return "$79.99 one-time"
+            case .yearly: return "$29.99 / year"
             }
         }
 
-        public var subtitle: String {
+        public var subpriceString: String {
             switch self {
-            case .annual: return "$2.49/mo · 7-Day Free Trial"
             case .monthly: return "Billed monthly · Cancel anytime"
-            case .lifetime: return "Pay once · Unlimited forever"
+            case .yearly: return "$2.49/mo · 7-Day Free Trial"
             }
         }
 
-        public var badge: String? {
+        public var discountBadge: String? {
             switch self {
-            case .annual: return "BEST VALUE · 50% OFF"
             case .monthly: return nil
-            case .lifetime: return "ONE-TIME"
+            case .yearly: return "Save 50%"
             }
         }
     }
 
-    @State private var selectedPlan: PlanTier = .annual
+    @State private var selectedPlan: PlanTier = .yearly
     @State private var isPurchasing = false
     @State private var showSuccessAlert = false
 
@@ -59,155 +56,267 @@ public struct RisePaywallView: View {
 
     public var body: some View {
         ZStack {
-            RiseScreenBackground(imageMaxHeight: 340, bottomScrimOpacity: 0.98)
+            // Dark Base Layer
+            RiseColors.backgroundPrimary
+                .ignoresSafeArea()
 
-            ScrollView(showsIndicators: false) {
-                VStack(spacing: RiseSpacing.lg) {
-                    // Top Chrome: Close + Restore
-                    HStack {
-                        RiseIconButton(
-                            iconName: "xmark",
-                            accessibilityLabel: "Close",
-                            style: .glass,
-                            size: RiseIconButtonMetrics.standard,
-                            action: { dismiss() }
-                        )
+            // Scrollable Content
+            ScrollView(.vertical, showsIndicators: false) {
+                VStack(spacing: 0) {
+                    // Hero Image & Header Stack
+                    ZStack(alignment: .top) {
+                        // Sunrise Hero Background
+                        Image("splash_sunrise_scene")
+                            .resizable()
+                            .scaledToFill()
+                            .frame(height: 380)
+                            .clipped()
+                            .overlay(
+                                LinearGradient(
+                                    stops: [
+                                        .init(color: Color.black.opacity(0.4), location: 0.0),
+                                        .init(color: Color.clear, location: 0.3),
+                                        .init(color: RiseColors.backgroundPrimary.opacity(0.88), location: 0.75),
+                                        .init(color: RiseColors.backgroundPrimary, location: 1.0),
+                                    ],
+                                    startPoint: .top,
+                                    endPoint: .bottom
+                                )
+                            )
 
-                        Spacer()
+                        // Top Bar: Centered RISE+ Brand & Dismiss Button
+                        VStack(spacing: 0) {
+                            HStack {
+                                Spacer()
 
-                        Button("Restore") {
-                            restorePurchases()
+                                // Centered RISE+ Logo
+                                HStack(spacing: 4) {
+                                    Text("RISE")
+                                        .font(.system(size: 20, weight: .black, design: .rounded))
+                                        .foregroundStyle(RiseColors.textPrimary)
+                                        .tracking(2)
+
+                                    Image(systemName: "sparkle")
+                                        .font(.system(size: 14, weight: .bold))
+                                        .foregroundStyle(RiseColors.gold)
+                                }
+                                .padding(.leading, 36) // Visual balance against close button
+
+                                Spacer()
+
+                                // Close Button
+                                Button {
+                                    dismiss()
+                                } label: {
+                                    Image(systemName: "xmark")
+                                        .font(.system(size: 13, weight: .bold))
+                                        .foregroundStyle(RiseColors.textPrimary)
+                                        .frame(width: 36, height: 36)
+                                        .background(Color.black.opacity(0.55))
+                                        .clipShape(Circle())
+                                }
+                                .buttonStyle(.plain)
+                                .accessibilityLabel("Close")
+                            }
+                            .padding(.horizontal, RiseSpacing.md)
+                            .padding(.top, 16)
+
+                            Spacer()
+
+                            // Editorial Headline & Subtitle
+                            VStack(alignment: .leading, spacing: 8) {
+                                Text("Rise beyond\nyour limits.")
+                                    .font(.system(size: 32, weight: .bold, design: .serif))
+                                    .foregroundStyle(RiseColors.textPrimary)
+                                    .lineSpacing(2)
+
+                                Text("Unlock unlimited AI Stoic coaching, full audio packs, and daily mindfulness depth.")
+                                    .font(RiseTypography.subheadline)
+                                    .foregroundStyle(RiseColors.textSecondary)
+                                    .lineSpacing(3)
+                            }
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                            .padding(.horizontal, RiseSpacing.md)
+                            .padding(.bottom, 16)
                         }
-                        .font(RiseTypography.caption)
-                        .foregroundStyle(RiseColors.textSecondary)
-                        .padding(.horizontal, 12)
-                        .padding(.vertical, 6)
-                        .background(RiseColors.surfaceGlass)
-                        .clipShape(Capsule())
+                        .frame(height: 380)
                     }
-                    .padding(.horizontal, RiseSpacing.md)
-                    .padding(.top, RiseSpacing.sm)
 
-                    // Hero Header
-                    VStack(spacing: 8) {
-                        HStack(spacing: 6) {
-                            Image(systemName: "sparkles")
-                                .font(.system(size: 11, weight: .bold))
-                            Text("UNLOCK RISE+")
-                                .font(RiseTypography.captionBold)
-                                .tracking(1.2)
-                        }
-                        .foregroundStyle(RiseColors.gold)
-                        .padding(.horizontal, 12)
-                        .padding(.vertical, 5)
-                        .background(RiseColors.gold.opacity(0.12))
-                        .clipShape(Capsule())
-                        .overlay(
-                            Capsule().stroke(RiseColors.gold.opacity(0.3), lineWidth: 1)
+                    // Feature Matrix Card
+                    VStack(spacing: 16) {
+                        featureRow(
+                            icon: "brain.head.profile",
+                            title: "Unlimited AI Morning Boosts",
+                            subtitle: "Deep Stoic cognitive reframing powered by Google Gemini"
                         )
-
-                        Text("Transform Your Mindset With Unlimited Depth")
-                            .font(RiseTypography.title1Bold)
-                            .foregroundStyle(RiseColors.textPrimary)
-                            .multilineTextAlignment(.center)
-                            .padding(.horizontal, 16)
-
-                        Text("Join over 10,000+ mindful individuals achieving calm consistency, daily focus, and emotional mastery.")
-                            .font(RiseTypography.subheadline)
-                            .foregroundStyle(RiseColors.textSecondary)
-                            .multilineTextAlignment(.center)
-                            .padding(.horizontal, 24)
-                    }
-
-                    // Feature Matrix
-                    VStack(alignment: .leading, spacing: 14) {
-                        featureRow(icon: "brain.head.profile", title: "Unlimited AI Morning Boosts", subtitle: "Deep philosophical reasoning powered by Google Gemini.")
-                        featureRow(icon: "shippingbox.fill", title: "Full 8 Rise Packs Library", subtitle: "All 56 guided audio sessions and transformational challenges.")
-                        featureRow(icon: "sparkles", title: "All 16 Affirmation Categories", subtitle: "Personalized daily affirmation decks & notification rotation.")
-                        featureRow(icon: "waveform", title: "528Hz Solfeggio Soundscapes", subtitle: "Procedural harmonic frequencies for deep focus & sleep.")
-                        featureRow(icon: "icloud.fill", title: "Encrypted Cloud Sync", subtitle: "Seamlessly sync your journal & streak across all your devices.")
+                        featureRow(
+                            icon: "shippingbox.fill",
+                            title: "Full 8 Rise Packs Library",
+                            subtitle: "56 guided audio sessions for Morning Reset, Focus & Calm"
+                        )
+                        featureRow(
+                            icon: "sparkles",
+                            title: "All 16 Affirmation Decks",
+                            subtitle: "Personalized daily affirmation rotations for your focus areas"
+                        )
+                        featureRow(
+                            icon: "waveform",
+                            title: "528Hz Solfeggio Soundscapes",
+                            subtitle: "Harmonic frequencies for deep focus, breathwork, and sleep"
+                        )
+                        featureRow(
+                            icon: "chart.line.uptrend.xyaxis",
+                            title: "Deep Habit & Streak Tracking",
+                            subtitle: "Milestone badges, mood trends, and monthly growth insights"
+                        )
                     }
                     .padding(18)
-                    .riseRichGlass(cornerRadius: RiseRadius.card)
+                    .background(Color(hex: "#121024").opacity(0.85))
+                    .clipShape(RoundedRectangle(cornerRadius: RiseRadius.cardLarge))
+                    .overlay(
+                        RoundedRectangle(cornerRadius: RiseRadius.cardLarge)
+                            .stroke(RiseColors.borderHairline, lineWidth: 1)
+                    )
                     .padding(.horizontal, RiseSpacing.md)
+                    .padding(.top, 4)
 
-                    // 3-Tier Plan Selector
-                    VStack(spacing: 10) {
-                        ForEach(PlanTier.allCases) { plan in
-                            planOptionCard(plan: plan)
+                    // Plan Selection Container
+                    VStack(alignment: .leading, spacing: 12) {
+                        HStack(spacing: 4) {
+                            Text("SELECT MEMBERSHIP")
+                                .font(RiseTypography.captionBold)
+                                .foregroundStyle(RiseColors.gold)
+                                .tracking(1.2)
                         }
+
+                        // Monthly Option
+                        planRow(plan: .monthly)
+
+                        // Yearly Option (Featured)
+                        planRow(plan: .yearly)
                     }
+                    .padding(18)
+                    .background(Color(hex: "#15122B").opacity(0.95))
+                    .clipShape(RoundedRectangle(cornerRadius: RiseRadius.cardLarge))
+                    .overlay(
+                        RoundedRectangle(cornerRadius: RiseRadius.cardLarge)
+                            .stroke(RiseColors.borderSubtle, lineWidth: 1)
+                    )
                     .padding(.horizontal, RiseSpacing.md)
+                    .padding(.top, 14)
 
-                    // CTA Button
-                    VStack(spacing: 8) {
-                        RisePrimaryButton(
-                            selectedPlan == .annual ? "Start 7-Day Free Trial" : "Continue with \(selectedPlan.title)",
-                            iconName: "arrow.right",
-                            style: .gold
-                        ) {
-                            purchaseSelectedPlan()
+                    // Primary Gold CTA Button
+                    Button {
+                        purchaseSelectedPlan()
+                    } label: {
+                        HStack {
+                            Spacer()
+                            Text(selectedPlan == .yearly ? "Start 7-Day Free Trial" : "Start RISE+ Monthly")
+                                .font(.system(size: 17, weight: .bold, design: .rounded))
+                                .foregroundStyle(RiseColors.textOnGold)
+                            Spacer()
                         }
-                        .disabled(isPurchasing)
+                        .frame(height: 54)
+                        .background(
+                            LinearGradient(
+                                colors: [
+                                    Color(hex: "#FDE68A"),
+                                    Color(hex: "#F59E0B"),
+                                    Color(hex: "#D97706"),
+                                ],
+                                startPoint: .top,
+                                endPoint: .bottom
+                            )
+                        )
+                        .clipShape(RoundedRectangle(cornerRadius: 16))
+                        .shadow(color: RiseColors.gold.opacity(0.3), radius: 12, y: 4)
+                    }
+                    .buttonStyle(.plain)
+                    .padding(.horizontal, RiseSpacing.md)
+                    .padding(.top, 18)
+                    .disabled(isPurchasing)
 
-                        Text(selectedPlan == .annual ? "Then $29.99/year. Cancel anytime in App Store." : "Auto-renews until canceled in App Store settings.")
-                            .font(RiseTypography.caption)
+                    // Reassurance & Subtext
+                    Text(selectedPlan == .yearly ? "7 days free, then $29.99/year. Cancel anytime." : "Auto-renews monthly until canceled in App Store.")
+                        .font(RiseTypography.caption)
+                        .foregroundStyle(RiseColors.textMuted)
+                        .padding(.top, 10)
+
+                    // Divider with "or"
+                    HStack(spacing: 12) {
+                        Rectangle()
+                            .fill(RiseColors.borderHairline)
+                            .frame(height: 1)
+                        Text("or")
+                            .font(RiseTypography.micro)
                             .foregroundStyle(RiseColors.textMuted)
-                            .multilineTextAlignment(.center)
+                        Rectangle()
+                            .fill(RiseColors.borderHairline)
+                            .frame(height: 1)
                     }
-                    .padding(.horizontal, RiseSpacing.md)
+                    .padding(.horizontal, 48)
+                    .padding(.vertical, 10)
 
-                    // Legal Footers
+                    // Restore Purchase
+                    Button {
+                        restorePurchases()
+                    } label: {
+                        Text("Restore Purchase")
+                            .font(RiseTypography.captionBold)
+                            .foregroundStyle(RiseColors.gold)
+                    }
+                    .buttonStyle(.plain)
+
+                    // Legal Links
                     HStack(spacing: 16) {
                         Button("Terms of Service") {}
-                            .font(RiseTypography.caption)
+                            .font(RiseTypography.micro)
                             .foregroundStyle(RiseColors.textMuted)
 
-                        Text("·")
+                        Text("•")
+                            .font(RiseTypography.micro)
                             .foregroundStyle(RiseColors.textMuted)
 
                         Button("Privacy Policy") {}
-                            .font(RiseTypography.caption)
+                            .font(RiseTypography.micro)
                             .foregroundStyle(RiseColors.textMuted)
                     }
-                    .padding(.bottom, 24)
+                    .padding(.top, 12)
+                    .padding(.bottom, 36)
                 }
             }
+            .ignoresSafeArea(edges: .top)
         }
-        .alert("Rise+ Activated!", isPresented: $showSuccessAlert) {
+        .alert("RISE+ Activated!", isPresented: $showSuccessAlert) {
             Button("Let's Rise") { dismiss() }
         } message: {
-            Text("Welcome to Rise+. You now have unlimited access to all AI engines, Rise Packs, and mindfulness tools.")
+            Text("Welcome to RISE+. You now have unlimited access to Google Gemini AI coaching, the full 8-Pack library, and harmonic soundscapes.")
         }
     }
 
-    // MARK: - Components
+    // MARK: - Subcomponents
 
     private func featureRow(icon: String, title: String, subtitle: String) -> some View {
-        HStack(alignment: .top, spacing: 12) {
-            ZStack {
-                Circle()
-                    .fill(RiseColors.gold.opacity(0.15))
-                    .frame(width: 28, height: 28)
-                Image(systemName: icon)
-                    .font(.system(size: 13, weight: .bold))
-                    .foregroundStyle(RiseColors.gold)
-            }
-            .padding(.top, 2)
+        HStack(alignment: .center, spacing: 14) {
+            Image(systemName: icon)
+                .font(.system(size: 17, weight: .semibold))
+                .foregroundStyle(RiseColors.gold)
+                .frame(width: 28, height: 28)
 
             VStack(alignment: .leading, spacing: 2) {
                 Text(title)
-                    .font(RiseTypography.bodyBold)
+                    .font(RiseTypography.bodyEmphasized)
                     .foregroundStyle(RiseColors.textPrimary)
                 Text(subtitle)
                     .font(RiseTypography.caption)
                     .foregroundStyle(RiseColors.textSecondary)
             }
+
             Spacer(minLength: 0)
         }
     }
 
-    private func planOptionCard(plan: PlanTier) -> some View {
+    private func planRow(plan: PlanTier) -> some View {
         let isSelected = selectedPlan == plan
 
         return Button {
@@ -216,52 +325,50 @@ public struct RisePaywallView: View {
             }
         } label: {
             HStack(spacing: 12) {
-                // Radio indicator
+                // Radio Circle
                 ZStack {
                     Circle()
                         .stroke(isSelected ? RiseColors.gold : RiseColors.textMuted.opacity(0.4), lineWidth: 2)
-                        .frame(width: 20, height: 20)
+                        .frame(width: 22, height: 22)
+
                     if isSelected {
                         Circle()
                             .fill(RiseColors.gold)
-                            .frame(width: 10, height: 10)
+                            .frame(width: 14, height: 14)
+                        Image(systemName: "checkmark")
+                            .font(.system(size: 8, weight: .bold))
+                            .foregroundStyle(RiseColors.textOnGold)
                     }
                 }
 
-                VStack(alignment: .leading, spacing: 3) {
-                    HStack(spacing: 8) {
-                        Text(plan.title)
-                            .font(RiseTypography.bodyBold)
-                            .foregroundStyle(RiseColors.textPrimary)
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(plan.title)
+                        .font(RiseTypography.bodyEmphasized)
+                        .foregroundStyle(RiseColors.textPrimary)
 
-                        if let badge = plan.badge {
-                            Text(badge)
-                                .font(.system(size: 9.5, weight: .bold))
-                                .foregroundStyle(RiseColors.backgroundPrimary)
-                                .padding(.horizontal, 6)
-                                .padding(.vertical, 2)
-                                .background(RiseColors.gold)
-                                .clipShape(Capsule())
-                        }
-                    }
-
-                    Text(plan.subtitle)
+                    Text(plan.subpriceString)
                         .font(RiseTypography.caption)
                         .foregroundStyle(RiseColors.textSecondary)
                 }
 
                 Spacer()
 
-                Text(plan.price)
-                    .font(RiseTypography.subheadlineBold)
-                    .foregroundStyle(isSelected ? RiseColors.gold : RiseColors.textPrimary)
+                if let badge = plan.discountBadge {
+                    Text(badge)
+                        .font(.system(size: 11, weight: .bold, design: .rounded))
+                        .foregroundStyle(RiseColors.textOnGold)
+                        .padding(.horizontal, 10)
+                        .padding(.vertical, 5)
+                        .background(RiseColors.gold)
+                        .clipShape(Capsule())
+                }
             }
             .padding(14)
-            .background(isSelected ? RiseColors.gold.opacity(0.08) : RiseColors.surfacePrimary.opacity(0.6))
-            .clipShape(RoundedRectangle(cornerRadius: RiseRadius.card))
+            .background(isSelected ? RiseColors.gold.opacity(0.06) : Color(hex: "#100C24"))
+            .clipShape(RoundedRectangle(cornerRadius: 14))
             .overlay(
-                RoundedRectangle(cornerRadius: RiseRadius.card)
-                    .stroke(isSelected ? RiseColors.gold : RiseColors.borderSubtle, lineWidth: isSelected ? 1.5 : 1)
+                RoundedRectangle(cornerRadius: 14)
+                    .stroke(isSelected ? RiseColors.gold : RiseColors.borderHairline, lineWidth: isSelected ? 1.5 : 1)
             )
         }
         .buttonStyle(.plain)
@@ -269,8 +376,7 @@ public struct RisePaywallView: View {
 
     private func purchaseSelectedPlan() {
         isPurchasing = true
-        let impact = UINotificationFeedbackGenerator()
-        impact.notificationOccurred(.success)
+        RiseHaptic.notification(.success)
 
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.8) {
             isPurchasing = false
@@ -279,8 +385,7 @@ public struct RisePaywallView: View {
     }
 
     private func restorePurchases() {
-        let impact = UIImpactFeedbackGenerator(style: .medium)
-        impact.impactOccurred()
+        RiseHaptic.impact(.medium)
     }
 }
 
