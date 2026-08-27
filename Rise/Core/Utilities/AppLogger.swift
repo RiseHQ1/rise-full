@@ -18,3 +18,27 @@ public enum AppLogger {
     public static let services = Logger(subsystem: subsystem, category: "Services")
     public static let ui = Logger(subsystem: subsystem, category: "UI")
 }
+
+/// Centralized lightweight logger wrapper for Rise.
+public enum RiseLogger {
+    public static func info(_ message: String) {
+        #if DEBUG
+        print("ℹ️ [Rise] \(message)")
+        #endif
+        AppLogger.app.info("\(message, privacy: .public)")
+    }
+
+    public static func warning(_ message: String) {
+        #if DEBUG
+        print("⚠️ [Rise] \(message)")
+        #endif
+        AppLogger.app.warning("\(message, privacy: .public)")
+    }
+
+    public static func error(_ message: String) {
+        #if DEBUG
+        print("❌ [Rise] \(message)")
+        #endif
+        AppLogger.app.error("\(message, privacy: .public)")
+    }
+}

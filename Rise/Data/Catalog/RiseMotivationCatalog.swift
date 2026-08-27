@@ -17,104 +17,52 @@ public final class RiseMotivationCatalog: Sendable {
 
     public init() {
         let collectedQuotes = Self.buildQuotes()
-        self.items = collectedQuotes
-        self.dailyThoughts = Self.buildDailyThoughts(from: collectedQuotes)
-        self.affirmations = Self.buildAffirmations()
+        items = collectedQuotes
+        dailyThoughts = Self.buildDailyThoughts(from: collectedQuotes)
+        affirmations = Self.buildAffirmations()
     }
 
     private static func buildQuotes() -> [MotivationDataBank.QuoteRecord] {
-        var collectedQuotes: [MotivationDataBank.QuoteRecord] = []
-        collectedQuotes.append(contentsOf: MotivationDataBank.baseQuotes)
+        var collected = MotivationDataBank.baseQuotes
+        collected.append(contentsOf: buildStoicWisdomQuotes())
+        collected.append(contentsOf: buildThemeQuotes())
+        return collected
+    }
 
-        // Expanded Author & Category Pools
-        let categories = [
-            "Mindset", "Discipline", "Calm", "Resilience",
-            "Focus", "Gratitude", "Growth", "Confidence",
-            "Purpose", "Clarity", "Inner Peace", "Courage",
-        ]
-
-        let authors = [
-            "Marcus Aurelius", "Seneca", "Epictetus", "Lao Tzu", "Rumi",
-            "James Clear", "Viktor Frankl", "Thich Nhat Hanh", "Carol Dweck",
-            "Alan Watts", "Ralph Waldo Emerson", "Henry David Thoreau", "Kobe Bryant",
-            "Bruce Lee", "Maya Angelou", "Brené Brown", "Eckhart Tolle", "Rise Journal",
-            "Tara Brach", "Dalai Lama", "Steve Jobs", "Eleanor Roosevelt", "Jocko Willink",
-            "Aristotle", "Socrates", "Albert Einstein", "Confucius", "Sun Tzu",
-        ]
-
-        let assets = [
-            "onboarding_motivation_bg",
-            "onboarding_improvements_bg",
-            "onboarding_focus_bg",
-            "onboarding_welcome_bg",
-            "splash_sunrise_scene",
-            "onboarding_summary_bg",
-        ]
-
-        let intros = [
-            "True strength lies in", "Every morning brings", "Your greatest asset is",
-            "Real growth begins when", "Peace is not the absence of storms, but",
-            "When you commit to small steps,", "The mind grows sharp through",
-            "Courage is found in", "Never underestimate the power of",
-            "Your potential expands with", "Wisdom is born from",
-            "The journey of self-mastery requires", "Quiet determination produces",
-            "A disciplined mind creates", "When you align your intentions with action,",
-            "Steadiness in difficulty reveals", "Honor your journey by",
-            "Clarity emerges when you", "True confidence comes from",
-            "A grateful heart discovers", "The secret to lasting progress is",
-            "Resilience is developed through", "Your breath is a reminder that",
-            "Focus is the art of",
-        ]
-
+    private static func buildStoicWisdomQuotes() -> [MotivationDataBank.QuoteRecord] {
+        let categories = ["Mindset", "Discipline", "Calm", "Resilience", "Focus", "Gratitude", "Growth", "Confidence"]
+        let authors = ["Marcus Aurelius", "Seneca", "Epictetus", "Lao Tzu", "Rumi", "James Clear", "Viktor Frankl", "Alan Watts"]
+        let intros = ["True strength lies in", "Every morning brings", "Your greatest asset is", "Real growth begins when", "Focus is the art of"]
         let predicates = [
             "the ability to remain calm amidst chaos.",
             "a fresh opportunity to begin again with clarity.",
             "the quiet confidence of continuous daily effort.",
             "you embrace discomfort as a teacher.",
-            "the calm center you maintain inside them.",
-            "monumental transformations inevitably follow.",
-            "unwavering focus and intentional action.",
-            "showing up even when certainty is distant.",
-            "a single day lived with conscious presence.",
-            "each decision to choose patience over haste.",
-            "listening deeply to what challenges teach you.",
-            "letting go of what you cannot control.",
-            "results that outlast temporary enthusiasm.",
-            "an unbreakable fortress of peace and resilience.",
-            "no obstacle can permanently hold you back.",
-            "the true depth of your inner strength.",
-            "celebrating the small victories along the way.",
-            "releasing distractions and prioritizing what matters most.",
-            "trusting your own ability to figure things out.",
-            "abundance in the simplest everyday moments.",
-            "showing up every day, regardless of mood or resistance.",
-            "embracing life's setbacks as stepping stones for growth.",
-            "every moment gives you the chance to begin anew.",
-            "saying no to the unimportant so you can achieve greatness.",
+            "saying no to the unimportant so you can achieve greatness."
         ]
 
+        var quotes: [MotivationDataBank.QuoteRecord] = []
         var counter = 0
         for intro in intros {
             for predicate in predicates {
                 let quoteText = "\(intro) \(predicate)"
                 let author = authors[counter % authors.count]
                 let category = categories[counter % categories.count]
-                let asset = assets[counter % assets.count]
-                let tags = [category.lowercased(), author.lowercased(), "daily", "motivation", "wisdom"]
-
-                collectedQuotes.append(
-                    MotivationDataBank.QuoteRecord(
-                        quote: quoteText,
-                        author: author,
-                        category: category,
-                        tags: tags,
-                        assetName: asset
-                    )
-                )
+                quotes.append(MotivationDataBank.QuoteRecord(
+                    quote: quoteText,
+                    author: author,
+                    category: category,
+                    tags: [category.lowercased(), author.lowercased(), "daily", "wisdom"],
+                    assetName: "onboarding_motivation_bg"
+                ))
                 counter += 1
             }
         }
+        return quotes
+    }
 
+    private static func buildThemeQuotes() -> [MotivationDataBank.QuoteRecord] {
+        let authors = ["Marcus Aurelius", "Seneca", "Epictetus", "James Clear", "Viktor Frankl", "Alan Watts"]
         let themes = [
             ("Overcoming Doubt", "Let go of self-doubt and step boldly into your next chapter."),
             ("Morning Energy", "Greet this dawn with vigor, optimism, and unshakeable belief."),
@@ -123,28 +71,24 @@ public final class RiseMotivationCatalog: Sendable {
             ("Unstoppable Grit", "When the road gets tough, your commitment becomes even tougher."),
             ("Kindness & Grace", "Extend compassion to yourself and everyone you encounter today."),
             ("Evening Calm", "Close this day in peace, letting go of what you could not finish."),
-            ("Infinite Potential", "You are capable of far more than your present boundaries suggest."),
+            ("Infinite Potential", "You are capable of far more than your present boundaries suggest.")
         ]
 
-        for (theme, text) in themes {
-            for i in 1 ... 120 {
-                let quoteText = "\(text) (\(theme) insight #\(i))"
-                let author = authors[(counter + i) % authors.count]
-                let category = categories[(counter + i) % categories.count]
-                let asset = assets[(counter + i) % assets.count]
-                collectedQuotes.append(
-                    MotivationDataBank.QuoteRecord(
-                        quote: quoteText,
-                        author: author,
-                        category: category,
-                        tags: [theme.lowercased(), category.lowercased(), "insight"],
-                        assetName: asset
-                    )
-                )
+        var quotes: [MotivationDataBank.QuoteRecord] = []
+        for (index, theme) in themes.enumerated() {
+            for i in 1 ... 40 {
+                let quoteText = "\(theme.1) (\(theme.0) #\(i))"
+                let author = authors[(index + i) % authors.count]
+                quotes.append(MotivationDataBank.QuoteRecord(
+                    quote: quoteText,
+                    author: author,
+                    category: theme.0,
+                    tags: [theme.0.lowercased(), "insight"],
+                    assetName: "splash_sunrise_scene"
+                ))
             }
         }
-
-        return collectedQuotes
+        return quotes
     }
 
     private static func buildDailyThoughts(from quotes: [MotivationDataBank.QuoteRecord]) -> [HomeState.Thought] {
