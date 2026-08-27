@@ -38,7 +38,7 @@ public final class RiseMotivationCatalog: Sendable {
             "a fresh opportunity to begin again with clarity.",
             "the quiet confidence of continuous daily effort.",
             "you embrace discomfort as a teacher.",
-            "saying no to the unimportant so you can achieve greatness."
+            "saying no to the unimportant so you can achieve greatness.",
         ]
 
         var quotes: [MotivationDataBank.QuoteRecord] = []
@@ -71,7 +71,7 @@ public final class RiseMotivationCatalog: Sendable {
             ("Unstoppable Grit", "When the road gets tough, your commitment becomes even tougher."),
             ("Kindness & Grace", "Extend compassion to yourself and everyone you encounter today."),
             ("Evening Calm", "Close this day in peace, letting go of what you could not finish."),
-            ("Infinite Potential", "You are capable of far more than your present boundaries suggest.")
+            ("Infinite Potential", "You are capable of far more than your present boundaries suggest."),
         ]
 
         var quotes: [MotivationDataBank.QuoteRecord] = []

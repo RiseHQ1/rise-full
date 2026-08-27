@@ -275,7 +275,7 @@ public struct RisePackDetailView: View {
                 requiresAuth: false
             )
             if let serverItems = serverPack.items, !serverItems.isEmpty {
-                self.sessions = serverItems.enumerated().map { index, item in
+                sessions = serverItems.enumerated().map { index, item in
                     PackSession(
                         id: index + 1,
                         dayNumber: item.day,

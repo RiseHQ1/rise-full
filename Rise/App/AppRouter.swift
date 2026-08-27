@@ -47,6 +47,7 @@ public enum AppRoute: Hashable, Sendable {
     case manageFocusAreas
 
     // MARK: - Commerce & Packs
+
     case paywall
     case packDetail(title: String, category: String, durationDays: Int, isPro: Bool, artworkAsset: String)
 }

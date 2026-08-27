@@ -16,7 +16,9 @@ public struct RisePaywallView: View {
         case monthly
         case lifetime
 
-        public var id: String { rawValue }
+        public var id: String {
+            rawValue
+        }
 
         public var title: String {
             switch self {

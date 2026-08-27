@@ -23,21 +23,21 @@ public enum AppLogger {
 public enum RiseLogger {
     public static func info(_ message: String) {
         #if DEBUG
-        print("ℹ️ [Rise] \(message)")
+            print("ℹ️ [Rise] \(message)")
         #endif
         AppLogger.app.info("\(message, privacy: .public)")
     }
 
     public static func warning(_ message: String) {
         #if DEBUG
-        print("⚠️ [Rise] \(message)")
+            print("⚠️ [Rise] \(message)")
         #endif
         AppLogger.app.warning("\(message, privacy: .public)")
     }
 
     public static func error(_ message: String) {
         #if DEBUG
-        print("❌ [Rise] \(message)")
+            print("❌ [Rise] \(message)")
         #endif
         AppLogger.app.error("\(message, privacy: .public)")
     }

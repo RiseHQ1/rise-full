@@ -223,10 +223,10 @@ public final class ProfileState {
                 endpoint: "user/profile",
                 method: "GET"
             )
-            self.fullName = serverUser.name
-            self.morningBoostTime = serverUser.morningBoostTime
-            self.eveningReflectionTime = serverUser.eveningReflectionTime
-            self.focusDuration = "\(serverUser.focusDurationMinutes) min/day"
+            fullName = serverUser.name
+            morningBoostTime = serverUser.morningBoostTime
+            eveningReflectionTime = serverUser.eveningReflectionTime
+            focusDuration = "\(serverUser.focusDurationMinutes) min/day"
             RiseLogger.info("Profile synchronized with live backend for \(serverUser.name)")
         } catch {
             RiseLogger.warning("Server profile fetch deferred: \(error.localizedDescription)")

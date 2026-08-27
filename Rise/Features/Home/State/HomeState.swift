@@ -181,8 +181,8 @@ public final class HomeState {
                     lines: [line1, line2],
                     highlightedLine: highlight.isEmpty ? "— \(serverItem.author)" : highlight
                 )
-                self.thoughts.insert(newThought, at: 0)
-                self.thoughtIndex = 0
+                thoughts.insert(newThought, at: 0)
+                thoughtIndex = 0
             }
             RiseLogger.info("Loaded today's motivation from live backend: \(serverItem.quote)")
         } catch {

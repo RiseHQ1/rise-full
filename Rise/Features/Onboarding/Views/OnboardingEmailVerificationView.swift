@@ -23,6 +23,7 @@ public struct OnboardingEmailVerificationView: View {
 
         ZStack(alignment: .top) {
             // MARK: - 1. Hero Sunset Scene Background
+
             VStack(spacing: 0) {
                 GeometryReader { geo in
                     Image("onboarding_account_creation_bg")
@@ -51,6 +52,7 @@ public struct OnboardingEmailVerificationView: View {
             .allowsHitTesting(false)
 
             // MARK: - 2. Content Layer
+
             ScrollView(.vertical, showsIndicators: false) {
                 VStack(alignment: .leading, spacing: 0) {
                     // Header Section
@@ -83,6 +85,7 @@ public struct OnboardingEmailVerificationView: View {
                     .padding(.bottom, 24)
 
                     // MARK: - 3. 6-Digit OTP Cells
+
                     VStack(spacing: 18) {
                         HStack(spacing: 10) {
                             ForEach(0 ..< 6, id: \.self) { index in
@@ -146,6 +149,7 @@ public struct OnboardingEmailVerificationView: View {
                         }
 
                         // MARK: - Verify Primary Button
+
                         RisePrimaryButton(
                             onboardingState.isVerifyingCode ? "Verifying..." : "Verify & Continue",
                             iconName: onboardingState.isVerifyingCode ? nil : "arrow.right",
