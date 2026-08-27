@@ -101,7 +101,11 @@ public final class OnboardingState {
     public var isPasswordVisible: Bool = false
     public var isConfirmPasswordVisible: Bool = false
     public var authProvider: AuthProvider?
-    public var isAuthenticating: Bool = false
+    public var isAuthenticatingEmail: Bool = false
+    public var isAuthenticatingSocial: Bool = false
+    public var isAuthenticating: Bool {
+        isAuthenticatingEmail || isAuthenticatingSocial
+    }
 
     // MARK: - OTP Email Verification Fields (Step 6)
 
@@ -262,7 +266,7 @@ public final class OnboardingState {
         authProvider = .email
         userName = trimmedName
 
-        isAuthenticating = true
+        isAuthenticatingEmail = true
         Task { @MainActor in
             do {
                 struct RegisterPayload: Encodable {
@@ -285,10 +289,10 @@ public final class OnboardingState {
                     accessToken: result.tokens.accessToken,
                     refreshToken: result.tokens.refreshToken
                 )
-                isAuthenticating = false
+                isAuthenticatingEmail = false
                 currentStepIndex = OnboardingStep.emailVerification.rawValue
             } catch {
-                isAuthenticating = false
+                isAuthenticatingEmail = false
                 RiseLogger.error("Registration error: \(error)")
                 // Try sending OTP code explicitly as backup
                 do {
@@ -385,7 +389,7 @@ public final class OnboardingState {
     }
 
     public func signInWithApple() {
-        isAuthenticating = true
+        isAuthenticatingSocial = true
         validationErrorMessage = nil
 
         let delegate = AppleSignInDelegate()
@@ -426,12 +430,18 @@ public final class OnboardingState {
                             let user: UserDTO
                             let tokens: AuthTokensDTO
                         }
-                        let payload = [
-                            "identityToken": identityToken,
-                            "appleUserId": appleUserId,
-                            "email": email.isEmpty ? nil : email,
-                            "name": fullName.isEmpty ? userName : fullName,
-                        ]
+                        struct AppleAuthPayload: Encodable {
+                            let identityToken: String
+                            let appleUserId: String
+                            let email: String?
+                            let name: String
+                        }
+                        let payload = AppleAuthPayload(
+                            identityToken: identityToken,
+                            appleUserId: appleUserId,
+                            email: email.isEmpty ? nil : email,
+                            name: fullName.isEmpty ? userName : fullName
+                        )
                         let authResult: AuthResponse = try await RiseAPIClient.shared.request(
                             endpoint: "auth/apple",
                             method: "POST",
@@ -445,13 +455,13 @@ public final class OnboardingState {
                     } catch {
                         RiseLogger.warning("Apple backend token exchange fallback: \(error.localizedDescription)")
                     }
-                    self.isAuthenticating = false
+                    self.isAuthenticatingSocial = false
                     self.validationErrorMessage = nil
                     self.currentStepIndex = OnboardingStep.summary.rawValue
                 }
             }
         case let .failure(error):
-            isAuthenticating = false
+            isAuthenticatingSocial = false
             let nsError = error as NSError
             if nsError.code != ASAuthorizationError.canceled.rawValue {
                 validationErrorMessage = "Apple Authentication failed. Please try again."
@@ -460,13 +470,13 @@ public final class OnboardingState {
     }
 
     public func signInWithGoogle() {
-        isAuthenticating = true
+        isAuthenticatingSocial = true
         validationErrorMessage = nil
 
         // Simulate Google Auth Session Handshake
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) { [weak self] in
             guard let self else { return }
-            self.isAuthenticating = false
+            self.isAuthenticatingSocial = false
             self.authProvider = .google
             if self.userName.isEmpty {
                 self.userName = "Alex"

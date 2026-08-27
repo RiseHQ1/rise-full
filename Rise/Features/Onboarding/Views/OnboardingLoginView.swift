@@ -142,7 +142,7 @@ public struct OnboardingLoginView: View {
                                 return
                             }
 
-                            onboardingState.isAuthenticating = true
+                            onboardingState.isAuthenticatingEmail = true
                             onboardingState.validationErrorMessage = nil
 
                             Task {
@@ -165,10 +165,10 @@ public struct OnboardingLoginView: View {
                                     onboardingState.userName = result.user.name
                                     onboardingState.emailInput = trimmedEmail
                                     onboardingState.authProvider = .email
-                                    onboardingState.isAuthenticating = false
+                                    onboardingState.isAuthenticatingEmail = false
                                     onboardingState.completeOnboarding(appState: appState)
                                 } catch {
-                                    onboardingState.isAuthenticating = false
+                                    onboardingState.isAuthenticatingEmail = false
                                     RiseLogger.warning("Login fallback: \(error.localizedDescription)")
                                     onboardingState.emailInput = trimmedEmail
                                     onboardingState.authProvider = .email

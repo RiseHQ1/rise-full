@@ -228,7 +228,7 @@ public struct OnboardingAccountCreationView: View {
                                 }
                             } label: {
                                 HStack(spacing: 10) {
-                                    if onboardingState.isAuthenticating {
+                                    if onboardingState.isAuthenticatingSocial {
                                         ProgressView()
                                             .tint(.white)
                                             .frame(width: 24, height: 24)
@@ -239,7 +239,7 @@ public struct OnboardingAccountCreationView: View {
                                             .frame(width: 24, height: 24)
                                     }
 
-                                    Text(onboardingState.isAuthenticating ? "Connecting..." : "Continue with Google")
+                                    Text(onboardingState.isAuthenticatingSocial ? "Connecting..." : "Continue with Google")
                                         .font(RiseTypography.calloutSemibold)
                                         .foregroundStyle(.white)
                                 }
@@ -280,9 +280,9 @@ public struct OnboardingAccountCreationView: View {
                         }
 
                         RisePrimaryButton(
-                            onboardingState.isAuthenticating ? "Creating account..." : "Create account",
-                            iconName: onboardingState.isAuthenticating ? nil : "arrow.right",
-                            isLoading: onboardingState.isAuthenticating,
+                            onboardingState.isAuthenticatingEmail ? "Creating account..." : "Create account",
+                            iconName: onboardingState.isAuthenticatingEmail ? nil : "arrow.right",
+                            isLoading: onboardingState.isAuthenticatingEmail,
                             style: .gold
                         ) {
                             onboardingState.advanceFromAccountCreation()
