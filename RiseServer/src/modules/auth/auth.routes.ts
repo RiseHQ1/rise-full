@@ -12,6 +12,7 @@ import {
   registerSchema,
   loginSchema,
   appleAuthSchema,
+  googleAuthSchema,
   refreshTokenSchema,
   forgotPasswordSchema,
   resetPasswordSchema,
@@ -84,6 +85,18 @@ export async function authRoutes(fastify: FastifyInstance) {
       },
     },
     authController.appleAuth.bind(authController)
+  );
+
+  fastify.post(
+    '/google',
+    {
+      schema: {
+        description: 'Authenticate or sign up using Google Sign-In',
+        tags: ['Authentication'],
+        body: googleAuthSchema,
+      },
+    },
+    authController.googleAuth.bind(authController)
   );
 
   fastify.post(

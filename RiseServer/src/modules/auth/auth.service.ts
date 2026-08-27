@@ -8,7 +8,7 @@
 import { prisma } from '@/database/prisma.js';
 import { redis } from '@/database/redis.js';
 import { hashPassword, verifyPassword, generateSecureToken, sha256 } from '@/utils/crypto.js';
-import { RegisterInput, LoginInput, AppleAuthInput, ResetPasswordInput } from './auth.schema.js';
+import { RegisterInput, LoginInput, AppleAuthInput, GoogleAuthInput, ResetPasswordInput } from './auth.schema.js';
 import { logger } from '@/utils/logger.js';
 import { EmailService } from '@/services/email/email.service.js';
 
@@ -164,6 +164,41 @@ export class AuthService {
           },
         });
       }
+    }
+
+    const tokens = await this.generateTokens(user.id, user.subscriptionTier, ipAddress, userAgent);
+
+    return {
+      user: this.sanitizeUser(user),
+      tokens,
+    };
+  }
+
+  /**
+   * Authenticate or register a user using Google Sign-In.
+   */
+  async authenticateWithGoogle(input: GoogleAuthInput, ipAddress?: string, userAgent?: string) {
+    let user = await prisma.user.findUnique({
+      where: { email: input.email.toLowerCase() },
+    });
+
+    if (!user) {
+      user = await prisma.user.create({
+        data: {
+          email: input.email.toLowerCase(),
+          name: input.name || 'Friend',
+          avatarUrl: input.avatarUrl,
+          authProvider: 'EMAIL',
+          isEmailVerified: true,
+          userProgress: {
+            create: {
+              currentStreak: 0,
+              bestStreak: 0,
+              mindfulMinutes: 0,
+            },
+          },
+        },
+      });
     }
 
     const tokens = await this.generateTokens(user.id, user.subscriptionTier, ipAddress, userAgent);

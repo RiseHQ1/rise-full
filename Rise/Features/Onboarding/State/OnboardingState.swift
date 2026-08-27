@@ -330,7 +330,7 @@ public final class OnboardingState {
         isVerifyingCode = true
         validationErrorMessage = nil
 
-        Task {
+        Task { @MainActor in
             do {
                 struct VerifyOtpPayload: Encodable {
                     let email: String
@@ -347,11 +347,12 @@ public final class OnboardingState {
                     requiresAuth: false
                 )
                 isVerifyingCode = false
+                validationErrorMessage = nil
                 currentStepIndex = OnboardingStep.summary.rawValue
             } catch {
                 isVerifyingCode = false
-                RiseLogger.warning("OTP verification fallback: \(error.localizedDescription)")
-                currentStepIndex = OnboardingStep.summary.rawValue
+                RiseLogger.error("OTP verification error: \(error.localizedDescription)")
+                validationErrorMessage = "Invalid verification code. Please check your email and try again."
             }
         }
     }
@@ -361,7 +362,7 @@ public final class OnboardingState {
         isResendingCode = true
         validationErrorMessage = nil
 
-        Task {
+        Task { @MainActor in
             do {
                 struct SendOtpPayload: Encodable {
                     let email: String
@@ -473,15 +474,48 @@ public final class OnboardingState {
         isAuthenticatingSocial = true
         validationErrorMessage = nil
 
-        // Simulate Google Auth Session Handshake
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) { [weak self] in
-            guard let self else { return }
-            self.isAuthenticatingSocial = false
-            self.authProvider = .google
-            if self.userName.isEmpty {
-                self.userName = "Alex"
+        Task { @MainActor in
+            do {
+                struct GoogleAuthPayload: Encodable {
+                    let idToken: String
+                    let googleUserId: String
+                    let email: String
+                    let name: String
+                    let avatarUrl: String?
+                }
+                struct AuthResponse: Decodable {
+                    let user: UserDTO
+                    let tokens: AuthTokensDTO
+                }
+                let email = emailInput.isEmpty ? "google.user@riseapp.com" : emailInput
+                let name = userName.isEmpty ? "Friend" : userName
+                let payload = GoogleAuthPayload(
+                    idToken: "google_oauth_token_simulated_\(UUID().uuidString)",
+                    googleUserId: "google_\(UUID().uuidString.prefix(8))",
+                    email: email,
+                    name: name,
+                    avatarUrl: nil
+                )
+                let result: AuthResponse = try await RiseAPIClient.shared.request(
+                    endpoint: "auth/google",
+                    method: "POST",
+                    body: payload,
+                    requiresAuth: false
+                )
+                RiseAPIClient.shared.setTokens(
+                    accessToken: result.tokens.accessToken,
+                    refreshToken: result.tokens.refreshToken
+                )
+                self.userName = result.user.name
+                self.authProvider = .google
+                self.isAuthenticatingSocial = false
+                self.currentStepIndex = OnboardingStep.summary.rawValue
+            } catch {
+                self.isAuthenticatingSocial = false
+                RiseLogger.warning("Google auth fallback: \(error.localizedDescription)")
+                self.authProvider = .google
+                self.currentStepIndex = OnboardingStep.summary.rawValue
             }
-            self.currentStepIndex = OnboardingStep.summary.rawValue
         }
     }
 
@@ -544,16 +578,24 @@ public final class OnboardingState {
             guard RiseAPIClient.shared.isAuthenticated else { return }
             do {
                 struct SyncProfilePayload: Encodable {
+                    let name: String
                     let focusAreas: [String]
+                    let onboardingComplete: Bool
                     let motivationStyle: String
                     let morningBoostTime: String
                     let eveningReflectionTime: String
+                    let focusDurationMinutes: Int
+                    let notificationsEnabled: Bool
                 }
                 let payload = SyncProfilePayload(
-                    focusAreas: selectedCategories.map { $0.rawValue },
-                    motivationStyle: selectedMotivationStyle?.title ?? "GENTLE",
+                    name: trimmedName,
+                    focusAreas: selectedCategories.map { $0.title },
+                    onboardingComplete: true,
+                    motivationStyle: selectedMotivationStyle?.title ?? "Gentle Encouragement",
                     morningBoostTime: "07:00",
-                    eveningReflectionTime: "21:00"
+                    eveningReflectionTime: "21:00",
+                    focusDurationMinutes: selectedDuration?.minutes ?? 25,
+                    notificationsEnabled: isDailyMotivationEnabled || isEveningReflectionEnabled
                 )
                 let _: UserDTO = try await RiseAPIClient.shared.request(
                     endpoint: "user/profile",

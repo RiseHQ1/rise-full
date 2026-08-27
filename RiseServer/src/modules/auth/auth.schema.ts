@@ -52,9 +52,18 @@ export const verifyOtpSchema = z.object({
   code: z.string().length(6, 'Verification code must be 6 digits'),
 });
 
+export const googleAuthSchema = z.object({
+  idToken: z.string().min(1, 'Google ID token is required'),
+  googleUserId: z.string().min(1, 'Google User ID is required'),
+  email: z.string().email('Invalid email address'),
+  name: z.string().optional(),
+  avatarUrl: z.string().optional(),
+});
+
 export type RegisterInput = z.infer<typeof registerSchema>;
 export type LoginInput = z.infer<typeof loginSchema>;
 export type AppleAuthInput = z.infer<typeof appleAuthSchema>;
+export type GoogleAuthInput = z.infer<typeof googleAuthSchema>;
 export type RefreshTokenInput = z.infer<typeof refreshTokenSchema>;
 export type ForgotPasswordInput = z.infer<typeof forgotPasswordSchema>;
 export type ResetPasswordInput = z.infer<typeof resetPasswordSchema>;

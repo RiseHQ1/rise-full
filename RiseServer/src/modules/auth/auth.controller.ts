@@ -11,6 +11,7 @@ import {
   RegisterInput,
   LoginInput,
   AppleAuthInput,
+  GoogleAuthInput,
   RefreshTokenInput,
   ForgotPasswordInput,
   ResetPasswordInput,
@@ -74,6 +75,29 @@ export class AuthController {
     const userAgent = request.headers['user-agent'];
 
     const result = await this.authService.authenticateWithApple(request.body, ip, userAgent);
+    const accessToken = await reply.jwtSign({
+      userId: result.user.id,
+      email: result.user.email || undefined,
+      role: result.user.role,
+      subscriptionTier: result.user.subscriptionTier,
+    });
+
+    return reply.status(200).send(
+      successResponse({
+        user: result.user,
+        tokens: {
+          accessToken,
+          ...result.tokens,
+        },
+      })
+    );
+  }
+
+  async googleAuth(request: FastifyRequest<{ Body: GoogleAuthInput }>, reply: FastifyReply) {
+    const ip = request.ip;
+    const userAgent = request.headers['user-agent'];
+
+    const result = await this.authService.authenticateWithGoogle(request.body, ip, userAgent);
     const accessToken = await reply.jwtSign({
       userId: result.user.id,
       email: result.user.email || undefined,

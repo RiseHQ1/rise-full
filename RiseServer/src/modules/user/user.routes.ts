@@ -42,6 +42,32 @@ export async function userRoutes(fastify: FastifyInstance) {
     userController.updateMe.bind(userController)
   );
 
+  fastify.put(
+    '/profile',
+    {
+      schema: {
+        description: 'Update user profile and onboarding preferences',
+        tags: ['User'],
+        security: [{ bearerAuth: [] }],
+        body: updateProfileSchema,
+      },
+    },
+    userController.updateMe.bind(userController)
+  );
+
+  fastify.patch(
+    '/profile',
+    {
+      schema: {
+        description: 'Update user profile and onboarding preferences',
+        tags: ['User'],
+        security: [{ bearerAuth: [] }],
+        body: updateProfileSchema,
+      },
+    },
+    userController.updateMe.bind(userController)
+  );
+
   fastify.post(
     '/change-password',
     {

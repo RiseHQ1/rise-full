@@ -278,6 +278,15 @@ public enum FocusDurationPreference: String, CaseIterable, Identifiable {
         }
     }
 
+    public var minutes: Int {
+        switch self {
+        case .fiveMinutes: return 5
+        case .tenMinutes: return 10
+        case .fifteenMinutes: return 15
+        case .whenever: return 25
+        }
+    }
+
     public var systemIcon: String {
         switch self {
         case .whenever: return "infinity"
