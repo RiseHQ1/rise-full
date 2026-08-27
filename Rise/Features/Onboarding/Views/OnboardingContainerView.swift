@@ -25,8 +25,8 @@ public struct OnboardingContainerView: View {
         case .motivationStyle: return "50%"
         case .routineSetup: return "67%"
         case .accountCreation: return "83%"
+        case .emailVerification: return "92%"
         case .summary: return "100%"
-        default: return "100%"
         }
     }
 
@@ -63,6 +63,9 @@ public struct OnboardingContainerView: View {
                         .transition(.opacity)
                 case .accountCreation:
                     OnboardingAccountCreationView()
+                        .transition(.opacity)
+                case .emailVerification:
+                    OnboardingEmailVerificationView()
                         .transition(.opacity)
                 case .summary:
                     OnboardingSummaryView()

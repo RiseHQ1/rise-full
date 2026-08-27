@@ -279,12 +279,18 @@ public struct OnboardingAccountCreationView: View {
                             .padding(.top, 2)
                         }
 
-                        RisePrimaryButton("Create account", iconName: "arrow.right", style: .gold) {
+                        RisePrimaryButton(
+                            onboardingState.isAuthenticating ? "Creating account..." : "Create account",
+                            iconName: onboardingState.isAuthenticating ? nil : "arrow.right",
+                            isLoading: onboardingState.isAuthenticating,
+                            style: .gold
+                        ) {
                             withAnimation(reduceMotion ? nil : .spring(response: 0.35, dampingFraction: 0.85)) {
                                 onboardingState.advanceFromAccountCreation()
                             }
                         }
                         .padding(.top, 4)
+                        .disabled(onboardingState.isAuthenticating)
 
                         // MARK: - Footer Lock & Terms Note
 
