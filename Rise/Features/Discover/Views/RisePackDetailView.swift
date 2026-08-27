@@ -172,6 +172,9 @@ public struct RisePackDetailView: View {
             }
         }
         .navigationBarHidden(true)
+        .task {
+            await loadPackDetails()
+        }
         .sheet(isPresented: $showPaywall) {
             RisePaywallView()
         }
@@ -260,6 +263,33 @@ public struct RisePackDetailView: View {
         } else {
             activePlayingSessionId = sessionId
             isPlaying = true
+        }
+    }
+
+    private func loadPackDetails() async {
+        let slug = packTitle.lowercased().replacingOccurrences(of: " ", with: "-")
+        do {
+            let serverPack: RisePackDTO = try await RiseAPIClient.shared.request(
+                endpoint: "packs/\(slug)",
+                method: "GET",
+                requiresAuth: false
+            )
+            if let serverItems = serverPack.items, !serverItems.isEmpty {
+                self.sessions = serverItems.enumerated().map { index, item in
+                    PackSession(
+                        id: index + 1,
+                        dayNumber: item.day,
+                        title: item.title,
+                        description: item.content,
+                        durationString: "\(item.durationMinutes) min",
+                        isAudio: item.type == "AUDIO",
+                        isCompleted: index == 0
+                    )
+                }
+            }
+            RiseLogger.info("Loaded pack details for \(packTitle) from server.")
+        } catch {
+            RiseLogger.warning("Pack details fetch fallback to local curriculum: \(error.localizedDescription)")
         }
     }
 }
