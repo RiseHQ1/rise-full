@@ -20,8 +20,8 @@ const envSchema = z.object({
   DATABASE_URL: z.string().min(1, 'DATABASE_URL is required'),
   REDIS_URL: z.string().default('redis://localhost:6379'),
 
-  JWT_ACCESS_SECRET: z.string().min(32),
-  JWT_REFRESH_SECRET: z.string().min(32),
+  JWT_ACCESS_SECRET: z.string().default(process.env.JWT_SECRET || '41acb74c8037a05d4a9ad3d5bf1661e332f1de075b5d6ac8f939ecfbcbe40c74'),
+  JWT_REFRESH_SECRET: z.string().default(process.env.JWT_REFRESH_SECRET || '8e7a64fb46cde11762d6c3e40f01359d06d9a7cd5c50dc3828ca0e1bd9b583ea'),
   JWT_ACCESS_EXPIRES_IN: z.string().default('15m'),
   JWT_REFRESH_EXPIRES_IN: z.string().default('30d'),
 
