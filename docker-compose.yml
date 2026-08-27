@@ -73,6 +73,13 @@ services:
       APNS_KEY_ID: ${APNS_KEY_ID:-}
       APNS_TEAM_ID: ${APNS_TEAM_ID:-}
       APNS_BUNDLE_ID: ${APNS_BUNDLE_ID:-com.riseapp.ios}
+      SMTP_HOST: ${SMTP_HOST:-smtp-relay.brevo.com}
+      SMTP_PORT: ${SMTP_PORT:-587}
+      SMTP_USER: ${SMTP_USER:-}
+      SMTP_PASS: ${SMTP_PASS:-}
+      EMAIL_FROM: ${EMAIL_FROM:-}
+      BREVO_API_KEY: ${BREVO_API_KEY:-}
+      RESEND_API_KEY: ${RESEND_API_KEY:-}
     volumes:
       - ./certs:/app/certs:ro
     ports:
@@ -99,13 +106,19 @@ services:
       NODE_ENV: production
       DATABASE_URL: postgresql://${POSTGRES_USER:-rise_admin}:${POSTGRES_PASSWORD:-RiseSecureDBPass2026!}@postgres:5432/${POSTGRES_DB:-rise_production}?schema=public
       REDIS_URL: redis://:${REDIS_PASSWORD:-RiseSecureRedisPass2026!}@redis:6379
-      JWT_SECRET: ${JWT_SECRET:-rise_jwt_super_secret_production_key_2026_x89}
       GEMINI_API_KEY: ${GEMINI_API_KEY:-}
       OPENAI_API_KEY: ${OPENAI_API_KEY:-}
       ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
       APNS_KEY_ID: ${APNS_KEY_ID:-}
       APNS_TEAM_ID: ${APNS_TEAM_ID:-}
       APNS_BUNDLE_ID: ${APNS_BUNDLE_ID:-com.riseapp.ios}
+      SMTP_HOST: ${SMTP_HOST:-smtp-relay.brevo.com}
+      SMTP_PORT: ${SMTP_PORT:-587}
+      SMTP_USER: ${SMTP_USER:-}
+      SMTP_PASS: ${SMTP_PASS:-}
+      EMAIL_FROM: ${EMAIL_FROM:-}
+      BREVO_API_KEY: ${BREVO_API_KEY:-}
+      JWT_SECRET: ${JWT_SECRET:-rise_jwt_super_secret_production_key_2026_x89}
     volumes:
       - ./certs:/app/certs:ro
     depends_on:
