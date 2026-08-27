@@ -13,6 +13,9 @@ public enum AppConstants {
     public static let appVersion = "1.0.0"
     public static let bundleIdentifier = "com.riseapp.Rise"
 
+    public static let serverBaseURL = "http://64.177.41.52:3000/api/v1"
+    public static let serverDomain = "64-177-41-52.sslip.io"
+
     public enum StorageKeys {
         public static let hasCompletedOnboarding = "has_completed_onboarding"
         public static let userProfile = "user_profile"

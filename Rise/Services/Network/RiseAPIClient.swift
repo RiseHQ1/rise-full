@@ -13,9 +13,9 @@ public final class RiseAPIClient: @unchecked Sendable {
     public static let shared = RiseAPIClient()
 
     #if DEBUG
-        public var baseURL = URL(string: "http://localhost:3000/api/v1")!
+        public var baseURL = URL(string: AppConstants.serverBaseURL)!
     #else
-        public var baseURL = URL(string: "https://api.riseapp.com/api/v1")!
+        public var baseURL = URL(string: AppConstants.serverBaseURL)!
     #endif
 
     private let session: URLSession
