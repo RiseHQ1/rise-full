@@ -30,6 +30,7 @@ public struct RiseIconButton: View {
     public let accessibilityLabel: String
     public var style: RiseIconButtonStyle
     public var size: CGFloat
+    public var iconColor: Color?
     /// When set, bounces the symbol only when this value changes (typically a tap counter).
     public var bounceTrigger: Int?
     public let action: () -> Void
@@ -39,6 +40,7 @@ public struct RiseIconButton: View {
         accessibilityLabel: String,
         style: RiseIconButtonStyle = .glass,
         size: CGFloat = RiseIconButtonMetrics.standard,
+        iconColor: Color? = nil,
         bounceTrigger: Int? = nil,
         action: @escaping () -> Void
     ) {
@@ -46,6 +48,7 @@ public struct RiseIconButton: View {
         self.accessibilityLabel = accessibilityLabel
         self.style = style
         self.size = size
+        self.iconColor = iconColor
         self.bounceTrigger = bounceTrigger
         self.action = action
     }
@@ -58,7 +61,7 @@ public struct RiseIconButton: View {
         }) {
             Image(systemName: iconName)
                 .font(RiseTypography.symbolSmall)
-                .foregroundStyle(RiseColors.textPrimary)
+                .foregroundStyle(iconColor ?? RiseColors.textPrimary)
                 .modifier(RiseOptionalSymbolBounce(trigger: bounceTrigger))
                 .frame(width: size, height: size)
                 .background {

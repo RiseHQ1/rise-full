@@ -25,31 +25,14 @@ public struct HomeHeaderView: View {
 
     public var body: some View {
         HStack {
-            Button(action: onMenuTap) {
-                ZStack {
-                    RoundedRectangle(cornerRadius: RiseRadius.control, style: .continuous)
-                        .fill(RiseAudioEngine.shared.isPlaying ? RiseColors.accentGold.opacity(0.25) : RiseColors.surfaceField.opacity(0.85))
-                        .overlay {
-                            RoundedRectangle(cornerRadius: RiseRadius.control, style: .continuous)
-                                .stroke(RiseAudioEngine.shared.isPlaying ? RiseColors.accentGold : RiseColors.borderHairline, lineWidth: 1)
-                        }
-
-                    HStack(spacing: 4) {
-                        Image(systemName: RiseAudioEngine.shared.isPlaying ? "waveform" : "waveform.badge.plus")
-                            .font(RiseTypography.captionSemibold)
-                            .foregroundStyle(RiseAudioEngine.shared.isPlaying ? RiseColors.accentGold : .white)
-
-                        if RiseAudioEngine.shared.isPlaying {
-                            Circle()
-                                .fill(RiseColors.accentGold)
-                                .frame(width: 6, height: 6)
-                        }
-                    }
-                }
-                .frame(width: 44, height: 44)
-            }
-            .buttonStyle(RisePressableButtonStyle())
-            .accessibilityLabel("Ambient Soundscapes")
+            RiseIconButton(
+                iconName: "waveform",
+                accessibilityLabel: "Ambient Soundscapes",
+                style: .glass,
+                size: RiseIconButtonMetrics.standard,
+                iconColor: RiseAudioEngine.shared.isPlaying ? RiseColors.accentGold : RiseColors.textPrimary,
+                action: onMenuTap
+            )
 
             Spacer(minLength: 0)
 
