@@ -8,7 +8,7 @@
 import Observation
 import SwiftUI
 
-/// Presentation state and lifecycle coordinator for the Splash screen.
+/// Presentation state, live session bootstrap, and lifecycle coordinator for the Splash screen.
 @Observable
 @MainActor
 public final class SplashState {
@@ -18,11 +18,17 @@ public final class SplashState {
     public var isCardVisible: Bool = false
     public var isLoadingVisible: Bool = false
     public var isCompleted: Bool = false
+    public var isSessionRestored: Bool = false
 
     public init() {}
 
-    /// Starts the orchestrated entrance animations and schedules the splash completion.
+    /// Starts the orchestrated entrance animations, validates live session with Rise API, and transitions to root.
     public func start(reduceMotion: Bool, onFinish: @escaping () -> Void) {
+        // Asynchronously bootstrap session with live Rise Server
+        Task {
+            await bootstrapSession()
+        }
+
         if reduceMotion {
             isLogoVisible = true
             isTaglineVisible = true
@@ -31,7 +37,7 @@ public final class SplashState {
             isLoadingVisible = true
 
             Task {
-                try? await Task.sleep(for: .seconds(2.5))
+                try? await Task.sleep(for: .seconds(2.0))
                 isCompleted = true
                 onFinish()
             }
@@ -44,29 +50,47 @@ public final class SplashState {
         }
 
         Task {
-            try? await Task.sleep(for: .milliseconds(300))
+            try? await Task.sleep(for: .milliseconds(250))
             withAnimation(RiseAnimations.riseIn) {
                 isTaglineVisible = true
             }
 
-            try? await Task.sleep(for: .milliseconds(300))
+            try? await Task.sleep(for: .milliseconds(250))
             withAnimation(RiseAnimations.riseIn) {
                 isMessageVisible = true
             }
 
-            try? await Task.sleep(for: .milliseconds(400))
+            try? await Task.sleep(for: .milliseconds(300))
             withAnimation(RiseAnimations.modalSpring) {
                 isCardVisible = true
                 isLoadingVisible = true
             }
 
             // Allow user to appreciate the artwork before transitioning
-            try? await Task.sleep(for: .seconds(2.2))
+            try? await Task.sleep(for: .seconds(1.8))
             withAnimation(RiseAnimations.standardEase) {
                 isCompleted = true
             }
-            try? await Task.sleep(for: .milliseconds(300))
+            try? await Task.sleep(for: .milliseconds(250))
             onFinish()
+        }
+    }
+
+    /// Validates existing Keychain token with live backend or silently falls back.
+    private func bootstrapSession() async {
+        guard RiseAPIClient.shared.isAuthenticated else {
+            return
+        }
+
+        do {
+            struct MeResponse: Decodable {
+                let user: UserDTO
+            }
+            let response: MeResponse = try await RiseAPIClient.shared.request(endpoint: "auth/me")
+            isSessionRestored = true
+            RiseLogger.info("Session successfully restored for user: \(response.user.name) (\(response.user.id))")
+        } catch {
+            RiseLogger.warning("Session token validation failed or offline: \(error.localizedDescription)")
         }
     }
 }
