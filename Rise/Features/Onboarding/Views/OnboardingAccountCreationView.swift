@@ -285,9 +285,7 @@ public struct OnboardingAccountCreationView: View {
                             isLoading: onboardingState.isAuthenticating,
                             style: .gold
                         ) {
-                            withAnimation(reduceMotion ? nil : .spring(response: 0.35, dampingFraction: 0.85)) {
-                                onboardingState.advanceFromAccountCreation()
-                            }
+                            onboardingState.advanceFromAccountCreation()
                         }
                         .padding(.top, 4)
                         .disabled(onboardingState.isAuthenticating)
