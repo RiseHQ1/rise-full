@@ -142,14 +142,42 @@ public struct OnboardingLoginView: View {
                                 return
                             }
 
-                            withAnimation(reduceMotion ? nil : .spring(response: 0.35, dampingFraction: 0.85)) {
-                                onboardingState.validationErrorMessage = nil
-                                onboardingState.emailInput = trimmedEmail
-                                onboardingState.authProvider = .email
-                                onboardingState.currentStepIndex = OnboardingStep.summary.rawValue
+                            onboardingState.isAuthenticating = true
+                            onboardingState.validationErrorMessage = nil
+
+                            Task {
+                                do {
+                                    struct LoginResponse: Decodable {
+                                        let user: UserDTO
+                                        let tokens: AuthTokensDTO
+                                    }
+                                    let payload = ["email": trimmedEmail, "password": passwordInput]
+                                    let result: LoginResponse = try await RiseAPIClient.shared.request(
+                                        endpoint: "auth/login",
+                                        method: "POST",
+                                        body: payload,
+                                        requiresAuth: false
+                                    )
+                                    RiseAPIClient.shared.setTokens(
+                                        accessToken: result.tokens.accessToken,
+                                        refreshToken: result.tokens.refreshToken
+                                    )
+                                    onboardingState.userName = result.user.name
+                                    onboardingState.emailInput = trimmedEmail
+                                    onboardingState.authProvider = .email
+                                    onboardingState.isAuthenticating = false
+                                    onboardingState.completeOnboarding(appState: appState)
+                                } catch {
+                                    onboardingState.isAuthenticating = false
+                                    RiseLogger.warning("Login fallback: \(error.localizedDescription)")
+                                    onboardingState.emailInput = trimmedEmail
+                                    onboardingState.authProvider = .email
+                                    onboardingState.currentStepIndex = OnboardingStep.summary.rawValue
+                                }
                             }
                         }
                         .padding(.top, 2)
+                        .disabled(onboardingState.isAuthenticating)
 
                         // Inline Validation Warning Banner
                         if let errorMessage = onboardingState.validationErrorMessage {

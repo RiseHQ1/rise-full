@@ -253,7 +253,34 @@ public final class OnboardingState {
         validationErrorMessage = nil
         authProvider = .email
         userName = trimmedName
-        currentStepIndex = OnboardingStep.summary.rawValue
+        
+        isAuthenticating = true
+        Task {
+            do {
+                struct AuthResponse: Decodable {
+                    let user: UserDTO
+                    let tokens: AuthTokensDTO
+                }
+                let payload = ["email": emailInput, "password": passwordInput, "name": trimmedName]
+                let result: AuthResponse = try await RiseAPIClient.shared.request(
+                    endpoint: "auth/register",
+                    method: "POST",
+                    body: payload,
+                    requiresAuth: false
+                )
+                RiseAPIClient.shared.setTokens(
+                    accessToken: result.tokens.accessToken,
+                    refreshToken: result.tokens.refreshToken
+                )
+                isAuthenticating = false
+                currentStepIndex = OnboardingStep.summary.rawValue
+            } catch {
+                isAuthenticating = false
+                // If account already exists or offline, proceed smoothly with local session
+                RiseLogger.warning("Online registration fallback: \(error.localizedDescription)")
+                currentStepIndex = OnboardingStep.summary.rawValue
+            }
+        }
     }
 
     public func signInWithApple() {
@@ -266,7 +293,6 @@ public final class OnboardingState {
         delegate.performSignIn { [weak self] result in
             guard let self else { return }
             Self.activeAppleDelegate = nil
-            self.isAuthenticating = false
             self.handleAppleSignInSuccess(result)
         }
     }
@@ -278,20 +304,53 @@ public final class OnboardingState {
                 let givenName = appleIDCredential.fullName?.givenName ?? ""
                 let familyName = appleIDCredential.fullName?.familyName ?? ""
                 let fullName = "\(givenName) \(familyName)".trimmingCharacters(in: .whitespaces)
+                let email = appleIDCredential.email ?? ""
+                let appleUserId = appleIDCredential.user
+                let identityToken = appleIDCredential.identityToken.flatMap { String(data: $0, encoding: .utf8) } ?? ""
 
                 authProvider = .apple
                 if !fullName.isEmpty {
                     userName = fullName
                 } else if userName.isEmpty {
-                    userName = "Kwame"
+                    userName = "Mindful Member"
                 }
-                if let email = appleIDCredential.email, !email.isEmpty {
+                if !email.isEmpty {
                     emailInput = email
                 }
-                validationErrorMessage = nil
-                currentStepIndex = OnboardingStep.summary.rawValue
+
+                // Send Apple credentials to live Rise Server
+                Task {
+                    do {
+                        struct AuthResponse: Decodable {
+                            let user: UserDTO
+                            let tokens: AuthTokensDTO
+                        }
+                        let payload = [
+                            "identityToken": identityToken,
+                            "appleUserId": appleUserId,
+                            "email": email.isEmpty ? nil : email,
+                            "name": fullName.isEmpty ? userName : fullName
+                        ]
+                        let authResult: AuthResponse = try await RiseAPIClient.shared.request(
+                            endpoint: "auth/apple",
+                            method: "POST",
+                            body: payload,
+                            requiresAuth: false
+                        )
+                        RiseAPIClient.shared.setTokens(
+                            accessToken: authResult.tokens.accessToken,
+                            refreshToken: authResult.tokens.refreshToken
+                        )
+                    } catch {
+                        RiseLogger.warning("Apple backend token exchange fallback: \(error.localizedDescription)")
+                    }
+                    self.isAuthenticating = false
+                    self.validationErrorMessage = nil
+                    self.currentStepIndex = OnboardingStep.summary.rawValue
+                }
             }
         case let .failure(error):
+            isAuthenticating = false
             let nsError = error as NSError
             if nsError.code != ASAuthorizationError.canceled.rawValue {
                 validationErrorMessage = "Apple Authentication failed. Please try again."
@@ -309,7 +368,7 @@ public final class OnboardingState {
             self.isAuthenticating = false
             self.authProvider = .google
             if self.userName.isEmpty {
-                self.userName = "Kwame" // Default name supplied by Google Auth
+                self.userName = "Alex"
             }
             self.currentStepIndex = OnboardingStep.summary.rawValue
         }
@@ -366,6 +425,28 @@ public final class OnboardingState {
         do {
             if let data = try? JSONEncoder().encode(profile) {
                 UserDefaults.standard.set(data, forKey: "saved_user_profile")
+            }
+        }
+
+        // Sync Focus Areas and Preferences to Live Backend
+        Task {
+            guard RiseAPIClient.shared.isAuthenticated else { return }
+            do {
+                let focusAreasArray = selectedCategories.map { $0.rawValue }
+                let body = [
+                    "focusAreas": focusAreasArray,
+                    "motivationStyle": selectedMotivationStyle?.title ?? "GENTLE",
+                    "morningBoostTime": "07:00",
+                    "eveningReflectionTime": "21:00"
+                ] as [String : Any]
+                let _: UserDTO = try await RiseAPIClient.shared.request(
+                    endpoint: "user/profile",
+                    method: "PUT",
+                    body: body
+                )
+                RiseLogger.info("Onboarding profile successfully synchronized to server.")
+            } catch {
+                RiseLogger.warning("Profile synchronization deferred: \(error.localizedDescription)")
             }
         }
 
