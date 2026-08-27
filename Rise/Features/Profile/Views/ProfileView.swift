@@ -41,6 +41,7 @@ public struct ProfileView: View {
                 .riseTabBarScrollClearance()
             }
             .onAppear { state.loadProfile() }
+            .task { await state.syncProfileWithServer() }
         }
         .toolbar(.hidden, for: .navigationBar)
         .sheet(isPresented: $showPaywall) {

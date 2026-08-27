@@ -216,6 +216,29 @@ public final class ProfileState {
         UserDefaults.standard.set(theme.rawValue, forKey: "profile_app_theme")
     }
 
+    public func syncProfileWithServer() async {
+        guard RiseAPIClient.shared.isAuthenticated else { return }
+        do {
+            let serverUser: UserDTO = try await RiseAPIClient.shared.request(
+                endpoint: "user/profile",
+                method: "GET"
+            )
+            self.fullName = serverUser.name
+            self.morningBoostTime = serverUser.morningBoostTime
+            self.eveningReflectionTime = serverUser.eveningReflectionTime
+            self.focusDuration = "\(serverUser.focusDurationMinutes) min/day"
+            RiseLogger.info("Profile synchronized with live backend for \(serverUser.name)")
+        } catch {
+            RiseLogger.warning("Server profile fetch deferred: \(error.localizedDescription)")
+        }
+    }
+
+    public func logOut() {
+        RiseAPIClient.shared.clearTokens()
+        UserDefaults.standard.removeObject(forKey: "saved_user_profile")
+        RiseLogger.info("User successfully logged out and tokens cleared.")
+    }
+
     public func route(for destination: PreferenceDestination) -> AppRoute? {
         switch destination {
         case .notificationPreferences: return .notificationPreferences
