@@ -7,7 +7,17 @@
 
 import { FastifyReply, FastifyRequest } from 'fastify';
 import { AuthService } from './auth.service.js';
-import { RegisterInput, LoginInput, AppleAuthInput, RefreshTokenInput, ForgotPasswordInput, ResetPasswordInput, AppleWebhookInput } from './auth.schema.js';
+import {
+  RegisterInput,
+  LoginInput,
+  AppleAuthInput,
+  RefreshTokenInput,
+  ForgotPasswordInput,
+  ResetPasswordInput,
+  AppleWebhookInput,
+  SendOtpInput,
+  VerifyOtpInput,
+} from './auth.schema.js';
 import { successResponse } from '@/utils/response.js';
 
 export class AuthController {

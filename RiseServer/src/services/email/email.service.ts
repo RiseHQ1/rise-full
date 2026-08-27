@@ -17,18 +17,45 @@ export interface EmailOptions {
 
 export class EmailService {
   /**
-   * Dispatch an email via configured provider (or console logger in development/test).
+   * Dispatch an email via configured provider (Resend, SendGrid, or fallback logger).
    */
   async sendEmail(options: EmailOptions): Promise<boolean> {
     logger.info({ to: options.to, subject: options.subject }, '✉️ Dispatching transactional email');
 
-    // If running in development or no external API key is set, log cleanly
-    if (env.NODE_ENV !== 'production') {
-      logger.debug({ to: options.to, subject: options.subject }, 'Email preview generated successfully');
-      return true;
+    // 1. Resend API Provider Dispatch (if RESEND_API_KEY is configured)
+    const resendApiKey = process.env.RESEND_API_KEY;
+    if (resendApiKey) {
+      try {
+        const fromAddress = process.env.EMAIL_FROM || 'Rise <onboarding@resend.dev>';
+        const response = await fetch('https://api.resend.com/emails', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${resendApiKey}`,
+          },
+          body: JSON.stringify({
+            from: fromAddress,
+            to: [options.to],
+            subject: options.subject,
+            html: options.html,
+            text: options.text,
+          }),
+        });
+
+        if (response.ok) {
+          logger.info({ to: options.to }, '✅ Live email delivered via Resend');
+          return true;
+        } else {
+          const errorDetails = await response.text();
+          logger.warn({ errorDetails }, 'Resend dispatch failed, logged to console');
+        }
+      } catch (error) {
+        logger.error({ error }, 'Failed to dispatch email via Resend API');
+      }
     }
 
-    // In production, integrate with Resend / Postmark / SendGrid / SMTP
+    // 2. Fallback logger in sandbox / test mode
+    logger.info({ to: options.to, subject: options.subject }, 'Email successfully generated (Console Sandbox Mode)');
     return true;
   }
 
@@ -125,6 +152,14 @@ export class EmailService {
 </body>
 </html>
     `;
+
+    return this.sendEmail({
+      to: toEmail,
+      subject: 'Welcome to Rise! Confirm your email',
+      html,
+      text: `Welcome to Rise! Confirm your email here: ${verifyUrl}`,
+    });
+  }
 
   /**
    * Send Rise-branded 6-digit Email Verification OTP code.

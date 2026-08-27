@@ -208,8 +208,6 @@ export class AuthService {
     };
   }
 
-  private emailService = new EmailService();
-
   /**
    * Initiate Forgot Password flow by generating a 15-minute reset token.
    */
