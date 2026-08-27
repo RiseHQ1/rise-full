@@ -141,6 +141,16 @@ public struct FeatureDestinationView: View {
             MorningBoostView()
         case .focusAreaDetail:
             MotivationCategoriesView()
+        case .paywall:
+            RisePaywallView()
+        case let .packDetail(title, category, durationDays, isPro, artworkAsset):
+            RisePackDetailView(
+                packTitle: title,
+                packCategory: category,
+                durationDays: durationDays,
+                isPro: isPro,
+                artworkAsset: artworkAsset
+            )
         }
     }
 }

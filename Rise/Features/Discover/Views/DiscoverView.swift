@@ -42,8 +42,11 @@ public struct DiscoverView: View {
                     categoriesSection
                         .riseAppear(delay: 0.16)
 
+                    risePacksSection
+                        .riseAppear(delay: 0.20)
+
                     featuredSection
-                        .riseAppear(delay: 0.22)
+                        .riseAppear(delay: 0.24)
 
                     trendingSection
                         .riseAppear(delay: 0.28)
@@ -282,8 +285,131 @@ public struct DiscoverView: View {
             .riseCardStroke(cornerRadius: RiseRadius.cardLarge)
             .riseShadow(RiseShadows.elevationLow)
         }
+    private var risePacksSection: some View {
+        VStack(alignment: .leading, spacing: RiseSpacing.sm) {
+            RiseInlineSectionHeader(title: "7-Day Rise Packs") {
+                appRouter.push(
+                    .packDetail(
+                        title: "Morning Reset",
+                        category: "Morning",
+                        durationDays: 7,
+                        isPro: false,
+                        artworkAsset: "pack_morning_reset"
+                    ),
+                    on: .discover
+                )
+            }
+
+            ScrollView(.horizontal, showsIndicators: false) {
+                HStack(spacing: 12) {
+                    packCard(
+                        title: "Morning Reset",
+                        category: "Morning",
+                        isPro: false,
+                        artwork: "pack_morning_reset"
+                    )
+                    packCard(
+                        title: "Unstoppable Confidence",
+                        category: "Confidence",
+                        isPro: true,
+                        artwork: "pack_confidence"
+                    )
+                    packCard(
+                        title: "Deep Focus & Flow",
+                        category: "Focus",
+                        isPro: true,
+                        artwork: "pack_deep_focus"
+                    )
+                    packCard(
+                        title: "Evening Reset",
+                        category: "Evening",
+                        isPro: false,
+                        artwork: "pack_evening_reset"
+                    )
+                    packCard(
+                        title: "Radical Self-Love",
+                        category: "Self-Love",
+                        isPro: true,
+                        artwork: "pack_self_love"
+                    )
+                    packCard(
+                        title: "Iron Discipline",
+                        category: "Discipline",
+                        isPro: true,
+                        artwork: "pack_discipline"
+                    )
+                }
+                .padding(.horizontal, RiseSpacing.md)
+            }
+            .padding(.horizontal, -RiseSpacing.md)
+        }
+    }
+
+    private func packCard(title: String, category: String, isPro: Bool, artwork: String) -> some View {
+        Button {
+            RiseHaptic.impact(.light)
+            appRouter.push(
+                .packDetail(
+                    title: title,
+                    category: category,
+                    durationDays: 7,
+                    isPro: isPro,
+                    artworkAsset: artwork
+                ),
+                on: .discover
+            )
+        } label: {
+            ZStack(alignment: .bottomLeading) {
+                Image(artwork)
+                    .resizable()
+                    .scaledToFill()
+                    .frame(width: 170, height: 210)
+                    .clipped()
+
+                LinearGradient(
+                    colors: [
+                        Color.clear,
+                        Color.black.opacity(0.3),
+                        Color.black.opacity(0.85),
+                    ],
+                    startPoint: .top,
+                    endPoint: .bottom
+                )
+
+                VStack(alignment: .leading, spacing: 6) {
+                    HStack {
+                        Text(isPro ? "PRO" : "FREE")
+                            .font(.system(size: 9.5, weight: .bold))
+                            .foregroundStyle(isPro ? RiseColors.gold : RiseColors.emerald)
+                            .padding(.horizontal, 6)
+                            .padding(.vertical, 3)
+                            .background(isPro ? RiseColors.gold.opacity(0.2) : RiseColors.emerald.opacity(0.2))
+                            .clipShape(Capsule())
+
+                        Spacer()
+
+                        Text("7 DAYS")
+                            .font(.system(size: 9.5, weight: .semibold))
+                            .foregroundStyle(RiseColors.textSecondary)
+                    }
+
+                    Text(title)
+                        .font(RiseTypography.subheadlineBold)
+                        .foregroundStyle(RiseColors.textPrimary)
+                        .lineLimit(2)
+
+                    Text("7 Audio Sessions")
+                        .font(RiseTypography.micro)
+                        .foregroundStyle(RiseColors.textMuted)
+                }
+                .padding(12)
+            }
+            .frame(width: 170, height: 210)
+            .riseCardStroke(cornerRadius: RiseRadius.cardLarge)
+            .riseShadow(RiseShadows.elevationLow)
+        }
         .buttonStyle(RisePressableButtonStyle())
-        .accessibilityLabel("\(category.title), \(category.count) items")
+        .accessibilityLabel("\(title), 7 days, \(isPro ? "Pro" : "Free")")
     }
 
     private var featuredSection: some View {

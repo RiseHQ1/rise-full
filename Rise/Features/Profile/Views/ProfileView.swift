@@ -12,6 +12,7 @@ public struct ProfileView: View {
     @Environment(AppRouter.self) private var appRouter
     @Environment(AppState.self) private var appState
     @State private var state = ProfileState()
+    @State private var showPaywall = false
 
     public init() {}
 
@@ -28,6 +29,7 @@ public struct ProfileView: View {
                         .frame(height: 92)
 
                     profileCard
+                    risePlusBanner
                     quoteCard
                     risePlanSection
                     preferencesSection
@@ -41,6 +43,9 @@ public struct ProfileView: View {
             .onAppear { state.loadProfile() }
         }
         .toolbar(.hidden, for: .navigationBar)
+        .sheet(isPresented: $showPaywall) {
+            RisePaywallView()
+        }
         .alert("Log Out?", isPresented: $state.showLogOutConfirm) {
             Button("Cancel", role: .cancel) {}
             Button("Log Out", role: .destructive) {
@@ -153,6 +158,67 @@ public struct ProfileView: View {
         .buttonStyle(RisePressableButtonStyle())
         .accessibilityLabel("\(state.fullName), \(state.memberSinceLabel), Member")
         .accessibilityHint("Opens personal information.")
+    }
+
+    private var risePlusBanner: some View {
+        Button {
+            RiseHaptic.impact(.medium)
+            showPaywall = true
+        } label: {
+            HStack(spacing: 14) {
+                ZStack {
+                    Circle()
+                        .fill(RiseColors.gold.opacity(0.18))
+                        .frame(width: 42, height: 42)
+                    Image(systemName: "sparkles")
+                        .font(.system(size: 18, weight: .bold))
+                        .foregroundStyle(RiseColors.gold)
+                }
+
+                VStack(alignment: .leading, spacing: 3) {
+                    HStack(spacing: 6) {
+                        Text("Rise+ Unlimited")
+                            .font(RiseTypography.bodyBold)
+                            .foregroundStyle(RiseColors.textPrimary)
+                        Text("PRO")
+                            .font(.system(size: 9, weight: .bold))
+                            .foregroundStyle(RiseColors.backgroundPrimary)
+                            .padding(.horizontal, 6)
+                            .padding(.vertical, 2)
+                            .background(RiseColors.gold)
+                            .clipShape(Capsule())
+                    }
+
+                    Text("Unlimited AI Boosts, 8 Packs & Soundscapes")
+                        .font(RiseTypography.caption)
+                        .foregroundStyle(RiseColors.textSecondary)
+                }
+
+                Spacer()
+
+                Image(systemName: "chevron.right")
+                    .font(RiseTypography.captionBold)
+                    .foregroundStyle(RiseColors.gold)
+            }
+            .padding(14)
+            .background(
+                LinearGradient(
+                    colors: [
+                        RiseColors.gold.opacity(0.12),
+                        RiseColors.surfacePrimary.opacity(0.7),
+                    ],
+                    startPoint: .leading,
+                    endPoint: .trailing
+                )
+            )
+            .clipShape(RoundedRectangle(cornerRadius: RiseRadius.card))
+            .overlay(
+                RoundedRectangle(cornerRadius: RiseRadius.card)
+                    .stroke(RiseColors.gold.opacity(0.4), lineWidth: 1)
+            )
+        }
+        .buttonStyle(RisePressableButtonStyle())
+        .accessibilityLabel("Rise Plus Unlimited, Pro membership banner")
     }
 
     private var quoteCard: some View {

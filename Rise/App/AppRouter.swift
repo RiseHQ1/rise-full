@@ -45,6 +45,10 @@ public enum AppRoute: Hashable, Sendable {
     case editStatusQuote
     case risePlanEdit
     case manageFocusAreas
+
+    // MARK: - Commerce & Packs
+    case paywall
+    case packDetail(title: String, category: String, durationDays: Int, isPro: Bool, artworkAsset: String)
 }
 
 /// Centralized app-level router coordinating root flow transitions and major cross-feature navigation.
