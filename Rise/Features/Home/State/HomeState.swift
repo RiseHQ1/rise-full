@@ -158,6 +158,38 @@ public final class HomeState {
         lastQuickAction = action
     }
 
+    /// Asynchronously fetches today's live thought from the production server.
+    public func loadServerContent() async {
+        do {
+            struct ThoughtServerItem: Decodable {
+                let quote: String
+                let author: String
+                let category: String
+            }
+            let serverItem: ThoughtServerItem = try await RiseAPIClient.shared.request(
+                endpoint: "motivation/daily-thought",
+                method: "GET",
+                requiresAuth: false
+            )
+            let words = serverItem.quote.split(separator: " ").map(String.init)
+            if words.count >= 6 {
+                let splitPoint = words.count / 2
+                let line1 = words[0 ..< splitPoint].joined(separator: " ")
+                let line2 = words[splitPoint ..< max(words.count - 3, splitPoint + 1)].joined(separator: " ")
+                let highlight = words[max(words.count - 3, splitPoint + 1) ..< words.count].joined(separator: " ")
+                let newThought = Thought(
+                    lines: [line1, line2],
+                    highlightedLine: highlight.isEmpty ? "— \(serverItem.author)" : highlight
+                )
+                self.thoughts.insert(newThought, at: 0)
+                self.thoughtIndex = 0
+            }
+            RiseLogger.info("Loaded today's motivation from live backend: \(serverItem.quote)")
+        } catch {
+            RiseLogger.warning("Live motivation fetch fallback to local bank: \(error.localizedDescription)")
+        }
+    }
+
     public var greetingPrefix: String {
         let hour = Calendar.current.component(.hour, from: Date())
         switch hour {

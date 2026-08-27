@@ -104,6 +104,9 @@ public struct HomeView: View {
             }
         }
         .toolbar(.hidden, for: .navigationBar)
+        .task {
+            await state.loadServerContent()
+        }
         .sheet(item: $sharePayload) { payload in
             RiseShareSheet(payload: payload)
         }

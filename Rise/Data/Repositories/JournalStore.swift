@@ -164,6 +164,15 @@ public final class JournalStore {
         persist()
     }
 
+    public func updateEntry(id: UUID, title: String, content: String, mood: String) -> Bool {
+        guard let index = entries.firstIndex(where: { $0.id == id }) else { return false }
+        entries[index].title = title
+        entries[index].content = content
+        entries[index].mood = mood
+        persist()
+        return true
+    }
+
     public func entry(for id: UUID) -> JournalEntryItem? {
         entries.first { $0.id == id }
     }

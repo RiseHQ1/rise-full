@@ -102,12 +102,48 @@ public struct EveningReflectionView: View {
         let impact = UINotificationFeedbackGenerator()
         impact.notificationOccurred(.success)
 
-        _ = JournalStore.shared.addEntry(
+        let entry = JournalStore.shared.addEntry(
             title: title,
             content: fullContent,
             mood: mood,
             assetName: "onboarding_focus_bg"
         )
+
+        // Asynchronously query Google Gemini for Stoic AI reflection insights
+        Task {
+            do {
+                let payload: [String: Any] = [
+                    "mood": mood.uppercased(),
+                    "category": "Reflection",
+                    "entryText": fullContent
+                ]
+                let aiResponse: AIReflectionResponseDTO = try await RiseAPIClient.shared.request(
+                    endpoint: "ai/reflection",
+                    method: "POST",
+                    body: payload
+                )
+                if let insight = aiResponse.insight, !insight.isEmpty {
+                    var updatedContent = fullContent
+                    if let stoic = aiResponse.stoicPerspective {
+                        updatedContent += "\n\n🏛️ Stoic Perspective:\n\(stoic)"
+                    }
+                    updatedContent += "\n\n💡 Rise AI Insight:\n\(insight)"
+                    if let takeaway = aiResponse.actionableTakeaway {
+                        updatedContent += "\n\n🎯 Tomorrow's Focus:\n\(takeaway)"
+                    }
+                    _ = JournalStore.shared.updateEntry(
+                        id: entry.id,
+                        title: title,
+                        content: updatedContent,
+                        mood: mood
+                    )
+                    RiseLogger.info("Gemini AI reflection insight successfully attached to journal entry.")
+                }
+            } catch {
+                RiseLogger.warning("AI reflection insight deferred or offline: \(error.localizedDescription)")
+            }
+        }
+
         dismiss()
     }
 }
