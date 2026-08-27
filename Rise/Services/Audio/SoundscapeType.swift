@@ -16,6 +16,7 @@ public enum SoundscapeType: String, CaseIterable, Identifiable, Hashable, Sendab
     case brownHush
     case solfeggio528
     case forestDawn
+    case campfire
 
     public var id: String {
         rawValue
@@ -27,9 +28,10 @@ public enum SoundscapeType: String, CaseIterable, Identifiable, Hashable, Sendab
         case .zenBell: return "Zen Singing Bowl"
         case .binauralAlpha: return "Alpha Wave (8Hz)"
         case .pinkRain: return "Gentle Rain"
-        case .brownHush: return "Deep Ocean Hush"
+        case .brownHush: return "Deep Ocean"
         case .solfeggio528: return "528Hz Solfeggio"
         case .forestDawn: return "Forest Dawn"
+        case .campfire: return "Cozy Campfire"
         }
     }
 
@@ -42,6 +44,7 @@ public enum SoundscapeType: String, CaseIterable, Identifiable, Hashable, Sendab
         case .brownHush: return "Deep ocean surf ambiance"
         case .solfeggio528: return "Harmonic clarity frequency"
         case .forestDawn: return "Fresh morning breeze & birds"
+        case .campfire: return "Warm crackling fire & embers"
         }
     }
 
@@ -54,6 +57,7 @@ public enum SoundscapeType: String, CaseIterable, Identifiable, Hashable, Sendab
         case .brownHush: return "water.waves"
         case .solfeggio528: return "sparkles"
         case .forestDawn: return "leaf.fill"
+        case .campfire: return "flame.fill"
         }
     }
 

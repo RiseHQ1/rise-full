@@ -23,6 +23,10 @@ public final class RiseAudioEngine {
         }
     }
 
+    public var sleepTimerMinutes: Int?
+    public var sleepTimerRemainingSeconds: Int = 0
+    private var sleepTimerTask: Task<Void, Never>?
+
     private var audioEngine: AVAudioEngine?
     private var sourceNode: AVAudioSourceNode?
     private var engineSourceNode: AVAudioMixerNode?
@@ -36,7 +40,7 @@ public final class RiseAudioEngine {
         var chimeEnvelope: Float = 0.0
         var chimePhase: Float = 0.0
         var brownNoiseAccumulator: Float = 0.0
-        var activeType: SoundscapeType = .binauralAlpha
+        var activeType: SoundscapeType = .pinkRain
         var isChimeActive: Bool = false
     }
 
@@ -53,6 +57,42 @@ public final class RiseAudioEngine {
             try session.setActive(true)
         } catch {
             print("[RiseAudioEngine] AudioSession setup error: \(error)")
+        }
+    }
+
+    /// Set or cancel the sleep timer
+    public func setSleepTimer(minutes: Int?) {
+        sleepTimerMinutes = minutes
+        sleepTimerTask?.cancel()
+        sleepTimerTask = nil
+
+        guard let minutes, minutes > 0 else {
+            sleepTimerRemainingSeconds = 0
+            return
+        }
+
+        sleepTimerRemainingSeconds = minutes * 60
+        sleepTimerTask = Task { @MainActor in
+            while !Task.isCancelled && self.sleepTimerRemainingSeconds > 0 {
+                try? await Task.sleep(nanoseconds: 1_000_000_000)
+                if Task.isCancelled {
+                    break
+                }
+                self.sleepTimerRemainingSeconds -= 1
+            }
+            if !Task.isCancelled && self.sleepTimerRemainingSeconds == 0 {
+                self.stopSoundscape()
+                self.sleepTimerMinutes = nil
+            }
+        }
+    }
+
+    /// Toggle soundscape playback on or off
+    public func toggleSoundscape(_ soundscape: SoundscapeType) {
+        if isPlaying, activeSoundscape == soundscape {
+            stopSoundscape()
+        } else {
+            startSoundscape(soundscape)
         }
     }
 
@@ -179,6 +219,15 @@ public final class RiseAudioEngine {
                     state.brownNoiseAccumulator = (state.brownNoiseAccumulator + (0.03 * white)) / 1.03
                     sampleL = state.brownNoiseAccumulator * 0.25 + breeze
                     sampleR = state.brownNoiseAccumulator * 0.25 + breeze
+
+                case .campfire:
+                    // Warm crackling fire and embers
+                    let white = Float.random(in: -1.0 ... 1.0)
+                    state.brownNoiseAccumulator = (state.brownNoiseAccumulator + (0.04 * white)) / 1.04
+                    let baseRumble = state.brownNoiseAccumulator * 0.4
+                    let crackle = Float.random(in: 0.0 ... 1.0) > 0.995 ? Float.random(in: -0.35 ... 0.35) : 0.0
+                    sampleL = baseRumble + crackle
+                    sampleR = baseRumble + crackle
                 }
 
                 // Mix active chime over soundscape if present

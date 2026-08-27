@@ -14,6 +14,7 @@ public struct HomeView: View {
 
     @State private var state = HomeState()
     @State private var sharePayload: RiseSharePayload?
+    @State private var showingSoundscapesModal: Bool = false
 
     public init() {}
 
@@ -25,8 +26,7 @@ public struct HomeView: View {
                 VStack(alignment: .leading, spacing: 12) {
                     HomeHeaderView(
                         onMenuTap: {
-                            state.didTapMenu = true
-                            appRouter.push(.motivationCategories, on: .home)
+                            showingSoundscapesModal = true
                         },
                         onNotificationsTap: {
                             state.didTapNotifications = true
@@ -109,6 +109,11 @@ public struct HomeView: View {
         }
         .sheet(item: $sharePayload) { payload in
             RiseShareSheet(payload: payload)
+        }
+        .sheet(isPresented: $showingSoundscapesModal) {
+            SoundscapesModalView()
+                .presentationDetents([.fraction(0.88), .large])
+                .presentationDragIndicator(.visible)
         }
     }
 
