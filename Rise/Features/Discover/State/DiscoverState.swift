@@ -184,4 +184,76 @@ public final class DiscoverState {
             assetName: item.backgroundAssetName
         )
     }
+
+    public func loadServerContent() async {
+        guard RiseAPIClient.shared.isAuthenticated else { return }
+        do {
+            struct DiscoverResponse: Decodable {
+                struct CategoryDTO: Decodable {
+                    let id: String
+                    let title: String
+                    let count: Int
+                    let backgroundAssetName: String
+                }
+
+                struct FeaturedDTO: Decodable {
+                    let id: String
+                    let tag: String
+                    let tagSystemIcon: String
+                    let tagColorHex: String
+                    let quote: String
+                    let highlight: String?
+                    let backgroundAssetName: String
+                    let likeCount: Int
+                    let isLiked: Bool
+                }
+
+                struct TrendingDTO: Decodable {
+                    let id: String
+                    let title: String
+                    let viewsLabel: String
+                    let iconAssetName: String
+                    let accentHex: String
+                }
+
+                let categories: [CategoryDTO]?
+                let featured: [FeaturedDTO]?
+                let trending: [TrendingDTO]?
+            }
+
+            let result: DiscoverResponse = try await RiseAPIClient.shared.request(
+                endpoint: "discover",
+                method: "GET"
+            )
+
+            if let serverCategories = result.categories, !serverCategories.isEmpty {
+                categories = serverCategories.map {
+                    CategoryItem(title: $0.title, count: $0.count, iconAssetName: "onboarding_icon_motivation", backgroundAssetName: $0.backgroundAssetName)
+                }
+            }
+
+            if let serverFeatured = result.featured, !serverFeatured.isEmpty {
+                featured = serverFeatured.map {
+                    FeaturedItem(
+                        tag: $0.tag,
+                        tagSystemIcon: $0.tagSystemIcon,
+                        tagColorHex: $0.tagColorHex,
+                        quote: $0.quote,
+                        highlight: $0.highlight,
+                        backgroundAssetName: $0.backgroundAssetName,
+                        likeCount: $0.likeCount,
+                        isLiked: $0.isLiked
+                    )
+                }
+            }
+
+            if let serverTrending = result.trending, !serverTrending.isEmpty {
+                trending = serverTrending.map {
+                    TrendingTopic(title: $0.title, viewsLabel: $0.viewsLabel, iconAssetName: $0.iconAssetName, accentHex: $0.accentHex)
+                }
+            }
+        } catch {
+            RiseLogger.warning("Discover server fetch notice: \(error.localizedDescription)")
+        }
+    }
 }

@@ -245,6 +245,33 @@ async function main() {
     });
   }
   console.log(`✅ Seeded ${affirmations.length} curated Affirmations.`);
+
+  // 3. Seed Motivation Quotes Catalog (Guide Appendix A)
+  const quotes = [
+    { quote: 'Small steps every day lead to big changes over time. Keep showing up.', author: 'Rise Motivation', category: 'Motivation', tags: ['motivation', 'daily-boost', 'consistency'], isFeatured: true, dayOfYear: 1 },
+    { quote: 'Your future is created by what you do today, not tomorrow.', author: 'Robert Kiyosaki', category: 'Mindset', tags: ['mindset', 'future', 'action'], isFeatured: true, dayOfYear: 2 },
+    { quote: 'Discipline is choosing what you want most over what you want now.', author: 'Abraham Lincoln', category: 'Discipline', tags: ['discipline', 'habits', 'focus'], isFeatured: true, dayOfYear: 3 },
+    { quote: 'Give your complete presence to one important task at a time.', author: 'Rise Focus', category: 'Focus', tags: ['focus', 'presence', 'clarity'], isFeatured: false, dayOfYear: 4 },
+    { quote: 'The only person you should try to be better than is who you were yesterday.', author: 'Anonymous', category: 'Self Growth', tags: ['self-growth', 'improvement'], isFeatured: false, dayOfYear: 5 },
+    { quote: 'You have power over your mind - not outside events. Realize this, and you will find strength.', author: 'Marcus Aurelius', category: 'Mindset', tags: ['stoicism', 'strength'], isFeatured: true, dayOfYear: 6 },
+    { quote: 'Do what you have to do until you can do what you want to do.', author: 'Oprah Winfrey', category: 'Motivation', tags: ['motivation', 'grit'], isFeatured: false, dayOfYear: 7 },
+    { quote: 'Action is the foundational key to all success.', author: 'Pablo Picasso', category: 'Discipline', tags: ['action', 'discipline'], isFeatured: false, dayOfYear: 8 },
+  ];
+
+  for (const q of quotes) {
+    await prisma.motivationQuote.create({
+      data: {
+        quote: q.quote,
+        author: q.author,
+        category: q.category,
+        tags: q.tags,
+        isFeatured: q.isFeatured,
+        dayOfYear: q.dayOfYear,
+        assetName: 'onboarding_motivation_bg',
+      },
+    });
+  }
+  console.log(`✅ Seeded ${quotes.length} curated Motivation Quotes.`);
   console.log('🎉 Seed completed successfully!');
 }
 
