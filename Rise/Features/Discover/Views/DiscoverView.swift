@@ -249,7 +249,7 @@ public struct DiscoverView: View {
     // MARK: - "Browse by category" Section
 
     private var categoriesSection: some View {
-        VStack(alignment: .leading, spacing: RiseSpacing.sm) {
+        VStack(alignment: .leading, spacing: 12) {
             RiseInlineSectionHeader(title: "Browse by category") {
                 state.didTapSeeAllCategories = true
                 appRouter.push(.motivationCategories, on: .discover)
@@ -275,37 +275,43 @@ public struct DiscoverView: View {
         } label: {
             ZStack(alignment: .bottomLeading) {
                 RiseArtworkImage(source: category.backgroundAssetName, fallbackAssetName: "onboarding_motivation_bg")
-                    .frame(width: 116, height: 154)
+                    .frame(width: 124, height: 172)
                     .clipped()
 
                 LinearGradient(
                     colors: [
                         Color.clear,
-                        Color.black.opacity(0.35),
-                        Color.black.opacity(0.88),
+                        Color.black.opacity(0.12),
+                        Color.black.opacity(0.65),
+                        Color.black.opacity(0.92),
                     ],
-                    startPoint: .center,
+                    startPoint: .top,
                     endPoint: .bottom
                 )
 
-                VStack(alignment: .leading, spacing: 4) {
+                VStack(alignment: .leading, spacing: 6) {
                     Text(category.title)
-                        .font(RiseTypography.captionSemibold)
+                        .font(.system(size: 15, weight: .semibold))
                         .foregroundStyle(RiseColors.textPrimary)
                         .lineLimit(1)
 
                     Text("\(category.count)")
-                        .font(RiseTypography.microBold)
-                        .foregroundStyle(RiseColors.accentTertiary)
-                        .padding(.horizontal, 8)
-                        .padding(.vertical, 2)
-                        .background(RiseColors.accentTertiary.opacity(0.28))
+                        .font(.system(size: 11.5, weight: .bold))
+                        .foregroundStyle(Color(hex: "#A594D1"))
+                        .padding(.horizontal, 9)
+                        .padding(.vertical, 3.5)
+                        .background(Color(hex: "#2B204D").opacity(0.88))
                         .clipShape(Capsule())
                 }
-                .padding(10)
+                .padding(.horizontal, 14)
+                .padding(.bottom, 14)
             }
-            .frame(width: 116, height: 154)
-            .riseCardStroke(cornerRadius: 16)
+            .frame(width: 124, height: 172)
+            .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
+            .overlay {
+                RoundedRectangle(cornerRadius: 18, style: .continuous)
+                    .stroke(Color.white.opacity(0.12), lineWidth: 1)
+            }
             .riseShadow(RiseShadows.elevationLow)
         }
         .buttonStyle(RisePressableButtonStyle())
@@ -339,8 +345,8 @@ public struct DiscoverView: View {
     }
 
     private func featuredCard(_ item: DiscoverState.FeaturedItem) -> some View {
-        let cardWidth: CGFloat = 216
-        let cardHeight: CGFloat = 268
+        let cardWidth: CGFloat = 226
+        let cardHeight: CGFloat = 286
         let tagColor = Color(hex: item.tagColorHex)
 
         return ZStack(alignment: .bottomLeading) {
@@ -350,55 +356,70 @@ public struct DiscoverView: View {
 
             LinearGradient(
                 colors: [
+                    Color.black.opacity(0.30),
                     Color.black.opacity(0.15),
-                    Color.black.opacity(0.55),
-                    Color.black.opacity(0.90),
+                    Color.black.opacity(0.68),
+                    Color.black.opacity(0.94),
                 ],
                 startPoint: .top,
                 endPoint: .bottom
             )
 
-            VStack(alignment: .leading, spacing: 8) {
+            VStack(alignment: .leading, spacing: 0) {
                 // Top Tag Badge
-                HStack(spacing: 4) {
+                HStack(spacing: 5) {
                     Image(systemName: item.tagSystemIcon)
-                        .font(RiseTypography.microBold)
+                        .font(.system(size: 12, weight: .bold))
                     Text(item.tag)
-                        .font(RiseTypography.microSemibold)
+                        .font(.system(size: 13, weight: .semibold))
                 }
                 .foregroundStyle(tagColor)
-                .padding(.horizontal, 10)
-                .padding(.vertical, 4)
-                .background(tagColor.opacity(0.28))
-                .clipShape(Capsule())
-
-                Spacer(minLength: 0)
-
-                Text(item.quote)
-                    .font(RiseTypography.subheadline)
-                    .foregroundStyle(RiseColors.textPrimary)
-                    .lineSpacing(3)
-                    .fixedSize(horizontal: false, vertical: true)
-
-                if let highlight = item.highlight {
-                    Text(highlight)
-                        .font(RiseTypography.subheadlineBold)
-                        .foregroundStyle(RiseColors.accentGold)
+                .padding(.horizontal, 12)
+                .padding(.vertical, 6)
+                .background(
+                    Capsule()
+                        .fill(tagColor.opacity(0.20))
+                )
+                .overlay {
+                    Capsule()
+                        .stroke(tagColor.opacity(0.35), lineWidth: 0.8)
                 }
 
+                Spacer(minLength: 16)
+
+                // Quote Text & Highlight
+                VStack(alignment: .leading, spacing: 6) {
+                    Text(item.quote)
+                        .font(.system(size: 18.5, weight: .semibold))
+                        .foregroundStyle(RiseColors.textPrimary)
+                        .lineSpacing(3.5)
+                        .fixedSize(horizontal: false, vertical: true)
+
+                    if let highlight = item.highlight {
+                        Text(highlight)
+                            .font(.system(size: 18, weight: .semibold))
+                            .foregroundStyle(Color(hex: "#BCAFE3"))
+                    }
+                }
+
+                Spacer(minLength: 18)
+
+                // Bottom Engagement Bar
                 HStack {
                     Button {
                         RiseHaptic.impact(.light)
                         state.toggleFeaturedLike(item)
                     } label: {
-                        HStack(spacing: 4) {
-                            Image(systemName: item.isLiked ? "heart.fill" : "heart.fill")
-                                .foregroundStyle(item.isLiked ? RiseColors.error : RiseColors.error.opacity(0.8))
+                        HStack(spacing: 6) {
+                            Image(systemName: "heart.fill")
+                                .font(.system(size: 16, weight: .semibold))
+                                .foregroundStyle(Color(hex: "#F45B7B"))
                                 .riseToggleBounce(trigger: item.isLiked)
+
                             Text(item.likeCountLabel)
-                                .foregroundStyle(RiseColors.textSecondary)
+                                .font(.system(size: 14, weight: .semibold))
+                                .foregroundStyle(RiseColors.textPrimary)
                         }
-                        .font(RiseTypography.captionSemibold)
                     }
                     .buttonStyle(.plain)
 
@@ -409,69 +430,110 @@ public struct DiscoverView: View {
                         state.toggleFeaturedSaved(item)
                     } label: {
                         Image(systemName: item.isSaved ? "bookmark.fill" : "bookmark")
-                            .font(RiseTypography.calloutSemibold)
-                            .foregroundStyle(item.isSaved ? RiseColors.accentSecondary : RiseColors.textPrimary)
+                            .font(.system(size: 18, weight: .semibold))
+                            .foregroundStyle(Color(hex: "#BCAFE3"))
                             .riseToggleBounce(trigger: item.isSaved)
                     }
                     .buttonStyle(.plain)
                 }
             }
-            .padding(14)
+            .padding(18)
         }
         .frame(width: cardWidth, height: cardHeight)
-        .riseCardStroke(cornerRadius: 20)
+        .clipShape(RoundedRectangle(cornerRadius: 22, style: .continuous))
+        .overlay {
+            RoundedRectangle(cornerRadius: 22, style: .continuous)
+                .stroke(Color.white.opacity(0.12), lineWidth: 1)
+        }
+        .riseShadow(RiseShadows.elevationLow)
     }
 
     // MARK: - "Trending topics" Section
 
     private var trendingSection: some View {
-        VStack(alignment: .leading, spacing: RiseSpacing.sm) {
+        VStack(alignment: .leading, spacing: 12) {
             RiseInlineSectionHeader(title: "Trending topics") {
                 state.didTapSeeAllTrending = true
                 appRouter.push(.motivationCategories, on: .discover)
             }
 
             ScrollView(.horizontal, showsIndicators: false) {
-                HStack(spacing: 10) {
+                HStack(spacing: 12) {
                     ForEach(state.trending) { topic in
-                        Button {
-                            RiseHaptic.impact(.light)
-                            appRouter.push(.morningBoost, on: .discover)
-                        } label: {
-                            RiseGlassCard(cornerRadius: 16, padding: 10, alwaysShowSpecular: true) {
-                                HStack(spacing: 10) {
-                                    ZStack {
-                                        RoundedRectangle(cornerRadius: 10, style: .continuous)
-                                            .fill(Color(hex: topic.accentHex).opacity(0.2))
-                                            .frame(width: 38, height: 38)
-
-                                        Image(topic.iconAssetName)
-                                            .resizable()
-                                            .scaledToFit()
-                                            .frame(width: 20, height: 20)
-                                    }
-
-                                    VStack(alignment: .leading, spacing: 2) {
-                                        Text(topic.title)
-                                            .font(RiseTypography.captionSemibold)
-                                            .foregroundStyle(RiseColors.textPrimary)
-                                            .lineLimit(1)
-                                        Text(topic.viewsLabel)
-                                            .font(RiseTypography.micro)
-                                            .foregroundStyle(RiseColors.textSecondary)
-                                    }
-
-                                    Spacer(minLength: 0)
-                                }
-                                .frame(width: 156, height: 46)
-                            }
-                        }
-                        .buttonStyle(RisePressableButtonStyle())
+                        trendingCard(topic)
                     }
                 }
                 .padding(.horizontal, RiseSpacing.md)
             }
             .padding(.horizontal, -RiseSpacing.md)
+        }
+    }
+
+    private func trendingCard(_ topic: DiscoverState.TrendingTopic) -> some View {
+        Button {
+            RiseHaptic.impact(.light)
+            appRouter.push(.morningBoost, on: .discover)
+        } label: {
+            HStack(spacing: 12) {
+                trendingIcon(for: topic)
+                    .frame(width: 34, height: 34)
+
+                VStack(alignment: .leading, spacing: 3) {
+                    Text(topic.title)
+                        .font(.system(size: 14.5, weight: .bold))
+                        .foregroundStyle(RiseColors.textPrimary)
+                        .lineLimit(2)
+                        .fixedSize(horizontal: false, vertical: true)
+
+                    Text(topic.viewsLabel)
+                        .font(.system(size: 13, weight: .medium))
+                        .foregroundStyle(Color(hex: "#9E97C2"))
+                }
+
+                Spacer(minLength: 0)
+            }
+            .padding(.horizontal, 16)
+            .padding(.vertical, 12)
+            .frame(width: 172, height: 74)
+            .background(
+                RoundedRectangle(cornerRadius: 18, style: .continuous)
+                    .fill(RiseColors.surfaceField.opacity(0.85))
+            )
+            .overlay {
+                RoundedRectangle(cornerRadius: 18, style: .continuous)
+                    .stroke(Color.white.opacity(0.12), lineWidth: 1)
+            }
+            .riseShadow(RiseShadows.elevationLow)
+        }
+        .buttonStyle(RisePressableButtonStyle())
+        .accessibilityLabel("\(topic.title), \(topic.viewsLabel) views")
+    }
+
+    @ViewBuilder
+    private func trendingIcon(for topic: DiscoverState.TrendingTopic) -> some View {
+        let accentColor = Color(hex: topic.accentHex)
+        let lower = topic.title.lowercased()
+
+        if lower.contains("habit") {
+            Image(systemName: "checkmark.circle")
+                .font(.system(size: 28, weight: .semibold))
+                .foregroundStyle(accentColor)
+        } else if lower.contains("morning") {
+            Image(systemName: "sun.max.fill")
+                .font(.system(size: 28, weight: .semibold))
+                .foregroundStyle(accentColor)
+        } else if lower.contains("fear") {
+            Image(systemName: "mountain.2")
+                .font(.system(size: 26, weight: .semibold))
+                .foregroundStyle(accentColor)
+        } else if lower.contains("consistency") {
+            Image(systemName: "calendar.badge.checkmark")
+                .font(.system(size: 26, weight: .semibold))
+                .foregroundStyle(accentColor)
+        } else {
+            Image(systemName: "sparkles")
+                .font(.system(size: 26, weight: .semibold))
+                .foregroundStyle(accentColor)
         }
     }
 }
