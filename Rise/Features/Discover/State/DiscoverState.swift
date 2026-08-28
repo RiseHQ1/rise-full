@@ -112,11 +112,36 @@ public final class DiscoverState {
     public var didTapSeeAllTrending: Bool = false
 
     public var categories: [CategoryItem] = [
-        .init(title: "Motivation", count: 128, iconAssetName: "onboarding_icon_motivation", backgroundAssetName: "onboarding_motivation_bg"),
-        .init(title: "Discipline", count: 96, iconAssetName: "onboarding_icon_discipline", backgroundAssetName: "onboarding_focus_bg"),
-        .init(title: "Focus", count: 84, iconAssetName: "onboarding_icon_target", backgroundAssetName: "onboarding_improvements_bg"),
-        .init(title: "Self Growth", count: 112, iconAssetName: "onboarding_icon_growth", backgroundAssetName: "onboarding_summary_bg"),
-        .init(title: "Mindset", count: 88, iconAssetName: "onboarding_icon_brain", backgroundAssetName: "splash_sunrise_scene"),
+        .init(
+            title: "Motivation",
+            count: 128,
+            iconAssetName: "onboarding_icon_motivation",
+            backgroundAssetName: "https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&w=600&q=80"
+        ),
+        .init(
+            title: "Discipline",
+            count: 96,
+            iconAssetName: "onboarding_icon_discipline",
+            backgroundAssetName: "https://images.unsplash.com/photo-1448375240586-882707db888b?auto=format&fit=crop&w=600&q=80"
+        ),
+        .init(
+            title: "Focus",
+            count: 84,
+            iconAssetName: "onboarding_icon_target",
+            backgroundAssetName: "https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=600&q=80"
+        ),
+        .init(
+            title: "Self Growth",
+            count: 112,
+            iconAssetName: "onboarding_icon_growth",
+            backgroundAssetName: "https://images.unsplash.com/photo-1416879595882-3373a0480b5b?auto=format&fit=crop&w=600&q=80"
+        ),
+        .init(
+            title: "Mindset",
+            count: 88,
+            iconAssetName: "onboarding_icon_brain",
+            backgroundAssetName: "https://images.unsplash.com/photo-1507499739999-097706ad8914?auto=format&fit=crop&w=600&q=80"
+        ),
     ]
 
     public var featured: [FeaturedItem] = [
@@ -126,7 +151,7 @@ public final class DiscoverState {
             tagColorHex: "#F59E0B",
             quote: "Small steps every day lead to big changes over time.",
             highlight: "Keep showing up.",
-            backgroundAssetName: "onboarding_motivation_bg",
+            backgroundAssetName: "https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=800&q=80",
             likeCount: 4820,
             isLiked: false
         ),
@@ -136,7 +161,7 @@ public final class DiscoverState {
             tagColorHex: "#8B5CF6",
             quote: "Your future is created by what you do today, not tomorrow.",
             highlight: nil,
-            backgroundAssetName: "splash_sunrise_scene",
+            backgroundAssetName: "https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=800&q=80",
             likeCount: 3240,
             isLiked: true
         ),
@@ -146,7 +171,7 @@ public final class DiscoverState {
             tagColorHex: "#10B981",
             quote: "Discipline is choosing what you want most over what you want now.",
             highlight: nil,
-            backgroundAssetName: "onboarding_focus_bg",
+            backgroundAssetName: "https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?auto=format&fit=crop&w=800&q=80",
             likeCount: 5120,
             isLiked: false
         ),
@@ -186,7 +211,6 @@ public final class DiscoverState {
     }
 
     public func loadServerContent() async {
-        guard RiseAPIClient.shared.isAuthenticated else { return }
         do {
             struct DiscoverResponse: Decodable {
                 struct CategoryDTO: Decodable {
@@ -223,7 +247,8 @@ public final class DiscoverState {
 
             let result: DiscoverResponse = try await RiseAPIClient.shared.request(
                 endpoint: "discover",
-                method: "GET"
+                method: "GET",
+                requiresAuth: false
             )
 
             if let serverCategories = result.categories, !serverCategories.isEmpty {
