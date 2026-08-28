@@ -346,20 +346,20 @@ public struct DiscoverView: View {
 
     private func featuredCard(_ item: DiscoverState.FeaturedItem) -> some View {
         let cardWidth: CGFloat = 226
-        let cardHeight: CGFloat = 286
-        let tagColor = Color(hex: item.tagColorHex)
+        let cardHeight: CGFloat = 300
 
         return ZStack(alignment: .bottomLeading) {
             RiseArtworkImage(source: item.backgroundAssetName, fallbackAssetName: "onboarding_motivation_bg")
                 .frame(width: cardWidth, height: cardHeight)
                 .clipped()
 
+            // Dark moody atmosphere vignette
             LinearGradient(
                 colors: [
-                    Color.black.opacity(0.30),
-                    Color.black.opacity(0.15),
-                    Color.black.opacity(0.68),
-                    Color.black.opacity(0.94),
+                    Color.black.opacity(0.50),
+                    Color.black.opacity(0.20),
+                    Color.black.opacity(0.72),
+                    Color.black.opacity(0.96),
                 ],
                 startPoint: .top,
                 endPoint: .bottom
@@ -369,20 +369,20 @@ public struct DiscoverView: View {
                 // Top Tag Badge
                 HStack(spacing: 5) {
                     Image(systemName: item.tagSystemIcon)
-                        .font(.system(size: 12, weight: .bold))
+                        .font(.system(size: 11.5, weight: .bold))
                     Text(item.tag)
-                        .font(.system(size: 13, weight: .semibold))
+                        .font(.system(size: 12.5, weight: .bold))
                 }
-                .foregroundStyle(tagColor)
+                .foregroundStyle(pillForeground(for: item.tag))
                 .padding(.horizontal, 12)
                 .padding(.vertical, 6)
                 .background(
                     Capsule()
-                        .fill(tagColor.opacity(0.20))
+                        .fill(pillBackground(for: item.tag))
                 )
                 .overlay {
                     Capsule()
-                        .stroke(tagColor.opacity(0.35), lineWidth: 0.8)
+                        .stroke(pillForeground(for: item.tag).opacity(0.35), lineWidth: 0.8)
                 }
 
                 Spacer(minLength: 16)
@@ -390,14 +390,14 @@ public struct DiscoverView: View {
                 // Quote Text & Highlight
                 VStack(alignment: .leading, spacing: 6) {
                     Text(item.quote)
-                        .font(.system(size: 18.5, weight: .semibold))
+                        .font(.system(size: 21, weight: .bold))
                         .foregroundStyle(RiseColors.textPrimary)
-                        .lineSpacing(3.5)
+                        .lineSpacing(4)
                         .fixedSize(horizontal: false, vertical: true)
 
                     if let highlight = item.highlight {
                         Text(highlight)
-                            .font(.system(size: 18, weight: .semibold))
+                            .font(.system(size: 19, weight: .semibold))
                             .foregroundStyle(Color(hex: "#BCAFE3"))
                     }
                 }
@@ -417,7 +417,7 @@ public struct DiscoverView: View {
                                 .riseToggleBounce(trigger: item.isLiked)
 
                             Text(item.likeCountLabel)
-                                .font(.system(size: 14, weight: .semibold))
+                                .font(.system(size: 14.5, weight: .bold))
                                 .foregroundStyle(RiseColors.textPrimary)
                         }
                     }
@@ -430,14 +430,14 @@ public struct DiscoverView: View {
                         state.toggleFeaturedSaved(item)
                     } label: {
                         Image(systemName: item.isSaved ? "bookmark.fill" : "bookmark")
-                            .font(.system(size: 18, weight: .semibold))
+                            .font(.system(size: 19, weight: .semibold))
                             .foregroundStyle(Color(hex: "#BCAFE3"))
                             .riseToggleBounce(trigger: item.isSaved)
                     }
                     .buttonStyle(.plain)
                 }
             }
-            .padding(18)
+            .padding(20)
         }
         .frame(width: cardWidth, height: cardHeight)
         .clipShape(RoundedRectangle(cornerRadius: 22, style: .continuous))
@@ -446,6 +446,30 @@ public struct DiscoverView: View {
                 .stroke(Color.white.opacity(0.12), lineWidth: 1)
         }
         .riseShadow(RiseShadows.elevationLow)
+    }
+
+    private func pillBackground(for tag: String) -> Color {
+        let lower = tag.lowercased()
+        if lower.contains("boost") || lower.contains("daily") {
+            return Color(hex: "#382910") // Rich dark amber
+        } else if lower.contains("mind") {
+            return Color(hex: "#2E1A4E") // Rich dark purple
+        } else if lower.contains("disc") {
+            return Color(hex: "#143324") // Rich dark emerald
+        }
+        return Color(hex: "#251D44")
+    }
+
+    private func pillForeground(for tag: String) -> Color {
+        let lower = tag.lowercased()
+        if lower.contains("boost") || lower.contains("daily") {
+            return Color(hex: "#FFC857") // Radiant gold
+        } else if lower.contains("mind") {
+            return Color(hex: "#C084FC") // Radiant violet
+        } else if lower.contains("disc") {
+            return Color(hex: "#34D399") // Radiant emerald
+        }
+        return Color(hex: "#A594D1")
     }
 
     // MARK: - "Trending topics" Section
