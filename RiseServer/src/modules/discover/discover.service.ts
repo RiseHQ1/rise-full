@@ -24,11 +24,36 @@ export class DiscoverService {
     ]);
 
     const categories = [
-      { id: 'cat-motivation', title: 'Motivation', count: 128, backgroundAssetName: 'onboarding_motivation_bg' },
-      { id: 'cat-discipline', title: 'Discipline', count: 96, backgroundAssetName: 'onboarding_focus_bg' },
-      { id: 'cat-focus', title: 'Focus', count: 84, backgroundAssetName: 'onboarding_improvements_bg' },
-      { id: 'cat-selfgrowth', title: 'Self Growth', count: 112, backgroundAssetName: 'onboarding_summary_bg' },
-      { id: 'cat-mindset', title: 'Mindset', count: 88, backgroundAssetName: 'splash_sunrise_scene' },
+      {
+        id: 'cat-motivation',
+        title: 'Motivation',
+        count: 128,
+        backgroundAssetName: 'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&w=600&q=80',
+      },
+      {
+        id: 'cat-discipline',
+        title: 'Discipline',
+        count: 96,
+        backgroundAssetName: 'https://images.unsplash.com/photo-1448375240586-882707db888b?auto=format&fit=crop&w=600&q=80',
+      },
+      {
+        id: 'cat-focus',
+        title: 'Focus',
+        count: 84,
+        backgroundAssetName: 'https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=600&q=80',
+      },
+      {
+        id: 'cat-selfgrowth',
+        title: 'Self Growth',
+        count: 112,
+        backgroundAssetName: 'https://images.unsplash.com/photo-1416879595882-3373a0480b5b?auto=format&fit=crop&w=600&q=80',
+      },
+      {
+        id: 'cat-mindset',
+        title: 'Mindset',
+        count: 88,
+        backgroundAssetName: 'https://images.unsplash.com/photo-1507499739999-097706ad8914?auto=format&fit=crop&w=600&q=80',
+      },
     ];
 
     const featured = [
@@ -39,7 +64,7 @@ export class DiscoverService {
         tagColorHex: '#F59E0B',
         quote: 'Small steps every day lead to big changes over time.',
         highlight: 'Keep showing up.',
-        backgroundAssetName: 'onboarding_motivation_bg',
+        backgroundAssetName: 'https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=800&q=80',
         likeCount: 4800,
         isLiked: false,
       },
@@ -50,7 +75,7 @@ export class DiscoverService {
         tagColorHex: '#8B5CF6',
         quote: 'Your future is created by what you do today, not tomorrow.',
         highlight: null,
-        backgroundAssetName: 'splash_sunrise_scene',
+        backgroundAssetName: 'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=800&q=80',
         likeCount: 3200,
         isLiked: true,
       },
@@ -61,7 +86,7 @@ export class DiscoverService {
         tagColorHex: '#10B981',
         quote: 'Discipline is choosing what you want most over what you want now.',
         highlight: null,
-        backgroundAssetName: 'onboarding_focus_bg',
+        backgroundAssetName: 'https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?auto=format&fit=crop&w=800&q=80',
         likeCount: 2700,
         isLiked: false,
       },

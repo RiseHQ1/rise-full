@@ -274,9 +274,7 @@ public struct DiscoverView: View {
             appRouter.push(.motivationCategories, on: .discover)
         } label: {
             ZStack(alignment: .bottomLeading) {
-                Image(category.backgroundAssetName)
-                    .resizable()
-                    .scaledToFill()
+                RiseArtworkImage(source: category.backgroundAssetName, fallbackAssetName: "onboarding_motivation_bg")
                     .frame(width: 116, height: 154)
                     .clipped()
 
@@ -346,9 +344,7 @@ public struct DiscoverView: View {
         let tagColor = Color(hex: item.tagColorHex)
 
         return ZStack(alignment: .bottomLeading) {
-            Image(item.backgroundAssetName)
-                .resizable()
-                .scaledToFill()
+            RiseArtworkImage(source: item.backgroundAssetName, fallbackAssetName: "onboarding_motivation_bg")
                 .frame(width: cardWidth, height: cardHeight)
                 .clipped()
 
